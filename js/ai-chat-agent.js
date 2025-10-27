@@ -46,11 +46,12 @@ class AIChatAgent {
                 How can I assist you today?`,
             'tenant-admin': `Hello! I'm your Tenant Admin AI Assistant. I can help you with:
                 <ul>
-                    <li>Deploying AI/ML services</li>
-                    <li>Managing users in your tenant</li>
-                    <li>Viewing usage and billing</li>
-                    <li>Configuring service settings</li>
-                    <li>Monitoring service health</li>
+                    <li>Deploying AI/ML services and workloads</li>
+                    <li>Managing and configuring deployed services</li>
+                    <li>Adding, removing, and managing users</li>
+                    <li>Viewing billing, usage, and costs</li>
+                    <li>Checking analytics and performance metrics</li>
+                    <li>Monitoring service health and troubleshooting</li>
                 </ul>
                 How can I help you today?`,
             'default': `Hello! I'm your Cisco iCMP AI Assistant. I can help you with various tasks and answer your questions about the platform. How can I assist you today?`
@@ -73,9 +74,11 @@ class AIChatAgent {
                 { icon: 'ticket-alt', label: 'Log Case', message: 'I need to log a support case' }
             ],
             'tenant-admin': [
-                { icon: 'server', label: 'My Services', message: 'Show my deployed services' },
-                { icon: 'users', label: 'Users', message: 'Show users in my tenant' },
-                { icon: 'dollar-sign', label: 'Billing', message: 'Show my billing information' }
+                { icon: 'rocket', label: 'Deploy Service', message: 'Help me deploy a new AI/ML service' },
+                { icon: 'server', label: 'My Services', message: 'Show my deployed services and their status' },
+                { icon: 'users', label: 'Manage Users', message: 'I need to add or remove users from my tenant' },
+                { icon: 'dollar-sign', label: 'Billing', message: 'Show my billing and usage information' },
+                { icon: 'chart-bar', label: 'Analytics', message: 'Show analytics and performance metrics' }
             ],
             'default': [
                 { icon: 'question-circle', label: 'Help', message: 'What can you help me with?' }

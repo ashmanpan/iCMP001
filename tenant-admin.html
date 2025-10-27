@@ -2094,7 +2094,26 @@
         // Initialize AI agent for tenant admin
         document.addEventListener('DOMContentLoaded', () => {
             const tenantId = sessionStorage.getItem('tenantId') || 'tenant-001';
-            initAIAgent('tenant-admin', tenantId);
+            initAIAgent('tenant-admin', tenantId, {
+                title: 'Tenant Admin AI Assistant',
+                welcomeMessage: `Hello! I'm your Tenant Admin AI Assistant. 🚀 I can help you:
+                    <ul>
+                        <li><strong>Deploy Services</strong> - Launch AI/ML services and workloads</li>
+                        <li><strong>Manage Services</strong> - Enable, disable, configure deployed services</li>
+                        <li><strong>User Management</strong> - Add, remove, and manage tenant users</li>
+                        <li><strong>Billing & Usage</strong> - View costs, consumption, and invoices</li>
+                        <li><strong>Analytics</strong> - Service performance and resource utilization</li>
+                        <li><strong>Service Health</strong> - Monitor uptime and troubleshoot issues</li>
+                    </ul>
+                    What would you like to do today?`,
+                quickActions: [
+                    { icon: 'rocket', label: 'Deploy Service', message: 'Help me deploy a new AI/ML service' },
+                    { icon: 'server', label: 'My Services', message: 'Show my deployed services and their status' },
+                    { icon: 'users', label: 'Manage Users', message: 'I need to add or remove users from my tenant' },
+                    { icon: 'dollar-sign', label: 'Billing', message: 'Show my billing and usage information' },
+                    { icon: 'chart-bar', label: 'Analytics', message: 'Show analytics and performance metrics' }
+                ]
+            });
         });
 
         // Toggle data source fields for fine-tuning
