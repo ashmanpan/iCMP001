@@ -763,5 +763,30 @@
             }
         });
     </script>
+
+    <!-- AI Chat Agent -->
+    <script src="js/ai-chat-agent.js"></script>
+    <script>
+        // Initialize AI chatbot for landing page with guest persona
+        document.addEventListener('DOMContentLoaded', function() {
+            initAIAgent('guest', null, {
+                title: 'iCMP AI Assistant',
+                welcomeMessage: `Hello! Welcome to Cisco iCMP! 👋 I'm your AI assistant. I can help you learn about:
+                    <ul>
+                        <li><strong>GPU Infrastructure</strong> - Our enterprise-grade GPU clusters</li>
+                        <li><strong>AI Services</strong> - LLM, RAG, Computer Vision, and more</li>
+                        <li><strong>Pricing</strong> - Flexible packages and enterprise plans</li>
+                        <li><strong>Getting Started</strong> - How to deploy your first service</li>
+                        <li><strong>Technical Specs</strong> - Performance, SLA, and capabilities</li>
+                    </ul>
+                    What would you like to know?`,
+                quickActions: [
+                    { icon: 'info-circle', label: 'Platform Info', message: 'Tell me about the Cisco iCMP platform and its capabilities' },
+                    { icon: 'dollar-sign', label: 'Pricing', message: 'What are the pricing options and packages available?' },
+                    { icon: 'rocket', label: 'Get Started', message: 'How do I get started with iCMP?' }
+                ]
+            });
+        });
+    </script>
 </body>
 </html>

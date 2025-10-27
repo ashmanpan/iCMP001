@@ -4,14 +4,80 @@
 const LAMBDA_ENDPOINT = 'https://eo8kg29mg3.execute-api.ap-south-1.amazonaws.com/prod/chat';
 
 class AIChatAgent {
-    constructor(containerId, role, tenantId = null) {
+    constructor(containerId, role, tenantId = null, config = {}) {
         this.container = document.getElementById(containerId);
         this.role = role;
         this.tenantId = tenantId;
         this.messages = [];
         this.isOpen = false;
 
+        // Customizable configuration
+        this.config = {
+            title: config.title || 'Cisco AI Assistant',
+            welcomeMessage: config.welcomeMessage || this.getDefaultWelcomeMessage(),
+            quickActions: config.quickActions || this.getDefaultQuickActions(),
+            ...config
+        };
+
         this.init();
+    }
+
+    getDefaultWelcomeMessage() {
+        const messages = {
+            'guest': `Hello! Welcome to Cisco iCMP! I'm your AI assistant. I can help you learn about:
+                <ul>
+                    <li>Our GPU infrastructure and AI services</li>
+                    <li>Pricing and service packages</li>
+                    <li>How to get started with the platform</li>
+                    <li>Technical specifications and capabilities</li>
+                    <li>Enterprise support options</li>
+                </ul>
+                What would you like to know?`,
+            'csp-admin': `Hello! I'm your CSP Admin AI Assistant. I can help you:
+                <ul>
+                    <li>Create and manage tenants</li>
+                    <li>Enable and configure services</li>
+                    <li>Allocate GPU resources</li>
+                    <li>Monitor platform usage</li>
+                    <li>Manage billing and subscriptions</li>
+                </ul>
+                How can I assist you today?`,
+            'tenant-admin': `Hello! I'm your Tenant Admin AI Assistant. I can help you with:
+                <ul>
+                    <li>Deploying AI/ML services</li>
+                    <li>Managing users in your tenant</li>
+                    <li>Viewing usage and billing</li>
+                    <li>Configuring service settings</li>
+                    <li>Monitoring service health</li>
+                </ul>
+                How can I help you today?`,
+            'default': `Hello! I'm your Cisco iCMP AI Assistant. I can help you with various tasks and answer your questions about the platform. How can I assist you today?`
+        };
+        return messages[this.role] || messages['default'];
+    }
+
+    getDefaultQuickActions() {
+        const actions = {
+            'guest': [
+                { icon: 'info-circle', label: 'Platform Overview', message: 'Tell me about the Cisco iCMP platform' },
+                { icon: 'dollar-sign', label: 'Pricing', message: 'What are the pricing options?' },
+                { icon: 'rocket', label: 'Get Started', message: 'How do I get started?' }
+            ],
+            'csp-admin': [
+                { icon: 'users', label: 'Show Tenants', message: 'Show me all tenants' },
+                { icon: 'microchip', label: 'GPU Status', message: 'Show GPU availability' },
+                { icon: 'chart-bar', label: 'Usage Stats', message: 'Show consumption rates' }
+            ],
+            'tenant-admin': [
+                { icon: 'server', label: 'My Services', message: 'Show my deployed services' },
+                { icon: 'users', label: 'Users', message: 'Show users in my tenant' },
+                { icon: 'dollar-sign', label: 'Billing', message: 'Show my billing information' }
+            ],
+            'default': [
+                { icon: 'question-circle', label: 'Help', message: 'What can you help me with?' }
+            ]
+        };
+        return actions[this.role] || actions['default'];
     }
 
     init() {
@@ -27,7 +93,7 @@ class AIChatAgent {
                     <div class="ai-chat-header">
                         <div class="ai-chat-title">
                             <i class="fas fa-robot"></i>
-                            <span>Cisco AI Assistant</span>
+                            <span>${this.config.title}</span>
                         </div>
                         <button class="ai-chat-minimize" onclick="aiAgent.toggle()">
                             <i class="fas fa-minus"></i>
@@ -40,15 +106,7 @@ class AIChatAgent {
                                 <i class="fas fa-robot"></i>
                             </div>
                             <div class="ai-message-content">
-                                <p>Hello! I'm your Cisco CMP AI Assistant. I can help you with:</p>
-                                <ul>
-                                    <li>Creating and managing tenants</li>
-                                    <li>Allocating and deallocating GPUs</li>
-                                    <li>Enabling services</li>
-                                    <li>Viewing usage and billing information</li>
-                                    <li>Answering questions about the platform</li>
-                                </ul>
-                                <p>How can I assist you today?</p>
+                                ${this.config.welcomeMessage}
                             </div>
                         </div>
                     </div>
@@ -65,15 +123,11 @@ class AIChatAgent {
                     </div>
 
                     <div class="ai-chat-quick-actions">
-                        <button class="quick-action-btn" onclick="aiAgent.quickAction('Show me all tenants')">
-                            <i class="fas fa-users"></i> Show Tenants
-                        </button>
-                        <button class="quick-action-btn" onclick="aiAgent.quickAction('Show GPU availability')">
-                            <i class="fas fa-microchip"></i> GPU Status
-                        </button>
-                        <button class="quick-action-btn" onclick="aiAgent.quickAction('Show consumption rates')">
-                            <i class="fas fa-chart-bar"></i> Usage Stats
-                        </button>
+                        ${this.config.quickActions.map(action => `
+                            <button class="quick-action-btn" onclick="aiAgent.quickAction('${action.message}')">
+                                <i class="fas fa-${action.icon}"></i> ${action.label}
+                            </button>
+                        `).join('')}
                     </div>
                 </div>
             </div>
@@ -503,7 +557,7 @@ class AIChatAgent {
 // Initialize AI agent (will be called from each dashboard)
 let aiAgent;
 
-function initAIAgent(role, tenantId = null) {
+function initAIAgent(role, tenantId = null, config = {}) {
     // Create container if it doesn't exist
     if (!document.getElementById('aiChatContainer')) {
         const container = document.createElement('div');
@@ -511,5 +565,5 @@ function initAIAgent(role, tenantId = null) {
         document.body.appendChild(container);
     }
 
-    aiAgent = new AIChatAgent('aiChatContainer', role, tenantId);
+    aiAgent = new AIChatAgent('aiChatContainer', role, tenantId, config);
 }
