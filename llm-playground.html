@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Playground - Cisco iCMP</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .playground-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow: hidden;
+        }
+
+        .comparison-toggle {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .playground-grid.compare-mode {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .llm-panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .llm-panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .llm-select {
+            flex: 1;
+            margin-right: 1rem;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 85%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: var(--cisco-blue);
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: var(--bg-elevated);
+            color: var(--cisco-blue);
+        }
+
+        .message-content {
+            background: var(--bg-elevated);
+            padding: 1rem;
+            border-radius: 12px;
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: var(--cisco-blue);
+            color: white;
+        }
+
+        .message-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .input-area {
+            padding: 1rem;
+            border-top: 1px solid var(--border-accent);
+        }
+
+        .prompt-input {
+            width: 100%;
+            min-height: 80px;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-accent);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text-primary);
+            resize: vertical;
+            font-family: inherit;
+            margin-bottom: 0.5rem;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: var(--cisco-blue);
+        }
+
+        .input-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .config-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .config-section h3 {
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .config-item {
+            margin-bottom: 1rem;
+        }
+
+        .config-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .slider {
+            width: 100%;
+        }
+
+        .metrics-bar {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: var(--cisco-blue);
+        }
+
+        .performance-chart {
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .chart-bars {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+            height: 100px;
+            margin-top: 1rem;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, var(--cisco-blue) 0%, var(--cisco-blue-dark) 100%);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            min-height: 10px;
+        }
+
+        .chart-label {
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: var(--bg-tertiary);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--cisco-blue);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .sample-prompts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .sample-prompt {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-accent);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sample-prompt:hover {
+            background: var(--cisco-blue);
+            color: white;
+            border-color: var(--cisco-blue);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header style="background: rgba(0, 0, 0, 0.95); border-bottom: 1px solid var(--border-primary); padding: 1rem 2rem;">
+        <div style="max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 2rem;">
+                <img src="https://translatorswithoutborders.org/wp-content/uploads/2021/12/Cisco-logo.png"
+                     alt="Cisco Logo"
+                     style="height: 40px; width: auto;">
+                <h1 style="font-size: 1.25rem; color: var(--cisco-blue);">
+                    <i class="fas fa-flask"></i> LLM Playground
+                </h1>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <a href="tenant-admin.html" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <div style="color: var(--text-muted);" id="userEmail"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="playground-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="config-section">
+                <h3><i class="fas fa-sliders-h"></i> Model Parameters</h3>
+
+                <div class="config-item">
+                    <div class="config-label">
+                        <span>Temperature</span>
+                        <span id="tempValue">0.7</span>
+                    </div>
+                    <input type="range" class="slider" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        Controls randomness. Higher = more creative
+                    </div>
+                </div>
+
+                <div class="config-item">
+                    <div class="config-label">
+                        <span>Max Tokens</span>
+                        <span id="tokensValue">1000</span>
+                    </div>
+                    <input type="range" class="slider" id="maxTokens" min="100" max="4000" step="100" value="1000">
+                </div>
+
+                <div class="config-item">
+                    <div class="config-label">
+                        <span>Top P</span>
+                        <span id="topPValue">0.9</span>
+                    </div>
+                    <input type="range" class="slider" id="topP" min="0" max="1" step="0.05" value="0.9">
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h3><i class="fas fa-microchip"></i> GPU Configuration</h3>
+
+                <div class="form-group">
+                    <label class="form-label">GPU Type</label>
+                    <select class="form-input" id="gpuType">
+                        <option value="h100">NVIDIA H100 (80GB)</option>
+                        <option value="a100">NVIDIA A100 (40GB)</option>
+                        <option value="v100">NVIDIA V100 (32GB)</option>
+                        <option value="l40">NVIDIA L40 (48GB)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">GPU Count</label>
+                    <select class="form-input" id="gpuCount">
+                        <option value="1">1 GPU</option>
+                        <option value="2">2 GPUs</option>
+                        <option value="4">4 GPUs</option>
+                        <option value="8">8 GPUs</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h3><i class="fas fa-chart-line"></i> Performance</h3>
+                <div class="performance-chart">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">Response Time</div>
+                    <div class="chart-bars" id="performanceChart">
+                        <!-- Chart bars will be added dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h3><i class="fas fa-lightbulb"></i> Sample Prompts</h3>
+                <div class="sample-prompts">
+                    <button class="sample-prompt" onclick="useSamplePrompt('Write a Python function to calculate Fibonacci numbers')">
+                        Fibonacci Function
+                    </button>
+                    <button class="sample-prompt" onclick="useSamplePrompt('Explain quantum computing in simple terms')">
+                        Quantum Computing
+                    </button>
+                    <button class="sample-prompt" onclick="useSamplePrompt('Create a REST API design for a blog platform')">
+                        API Design
+                    </button>
+                    <button class="sample-prompt" onclick="useSamplePrompt('Write a poem about artificial intelligence')">
+                        AI Poem
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Area -->
+        <div class="main-area">
+            <!-- Comparison Toggle -->
+            <div class="comparison-toggle">
+                <div>
+                    <h3 style="margin: 0; font-size: 1rem;">
+                        <i class="fas fa-flask"></i> Testing Mode
+                    </h3>
+                    <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">
+                        Compare multiple LLMs side-by-side
+                    </p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="font-size: 0.875rem;">Compare Mode</span>
+                    <div class="toggle-switch" id="compareToggle" onclick="toggleCompareMode()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playground Grid -->
+            <div class="playground-grid" id="playgroundGrid">
+                <!-- Panel 1 -->
+                <div class="llm-panel">
+                    <div class="llm-panel-header">
+                        <select class="form-input llm-select" id="llmSelect1" onchange="updatePanelModel(1)">
+                            <option value="">Select LLM Service...</option>
+                            <option value="gpt4">GPT-4 Turbo</option>
+                            <option value="claude-sonnet">Claude Sonnet 4</option>
+                            <option value="llama3-70b">Llama 3 70B</option>
+                            <option value="mistral-large">Mistral Large</option>
+                            <option value="gemini-pro">Gemini Pro</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm" onclick="clearChat(1)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <div class="metrics-bar" id="metrics1" style="display: none;">
+                        <div class="metric">
+                            <span class="metric-label">Response Time</span>
+                            <span class="metric-value" id="responseTime1">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Tokens</span>
+                            <span class="metric-value" id="tokens1">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Cost</span>
+                            <span class="metric-value" id="cost1">--</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-container" id="chat1">
+                        <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                            <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p>Select an LLM service to start testing</p>
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <textarea class="prompt-input" id="prompt1" placeholder="Enter your prompt here..."
+                                  onkeydown="if(event.key==='Enter' && event.ctrlKey) sendPrompt(1)"></textarea>
+                        <div class="input-controls">
+                            <button class="btn btn-primary" onclick="sendPrompt(1)" id="sendBtn1">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Ctrl + Enter to send</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2 (Hidden by default) -->
+                <div class="llm-panel" id="panel2" style="display: none;">
+                    <div class="llm-panel-header">
+                        <select class="form-input llm-select" id="llmSelect2" onchange="updatePanelModel(2)">
+                            <option value="">Select LLM Service...</option>
+                            <option value="gpt4">GPT-4 Turbo</option>
+                            <option value="claude-sonnet">Claude Sonnet 4</option>
+                            <option value="llama3-70b">Llama 3 70B</option>
+                            <option value="mistral-large">Mistral Large</option>
+                            <option value="gemini-pro">Gemini Pro</option>
+                        </select>
+                        <button class="btn btn-secondary btn-sm" onclick="clearChat(2)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
+                    <div class="metrics-bar" id="metrics2" style="display: none;">
+                        <div class="metric">
+                            <span class="metric-label">Response Time</span>
+                            <span class="metric-value" id="responseTime2">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Tokens</span>
+                            <span class="metric-value" id="tokens2">--</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Cost</span>
+                            <span class="metric-value" id="cost2">--</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-container" id="chat2">
+                        <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                            <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                            <p>Select an LLM service to compare</p>
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <textarea class="prompt-input" id="prompt2" placeholder="Enter your prompt here..."
+                                  onkeydown="if(event.key==='Enter' && event.ctrlKey) sendPrompt(2)"></textarea>
+                        <div class="input-controls">
+                            <button class="btn btn-primary" onclick="sendPrompt(2)" id="sendBtn2">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Ctrl + Enter to send</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script>
+        // Initialize
+        const tenantId = sessionStorage.getItem('tenantId') || 'tenant-001';
+        const userEmail = sessionStorage.getItem('email') || 'user@example.com';
+        document.getElementById('userEmail').textContent = userEmail;
+
+        let compareMode = false;
+        const chatHistories = { 1: [], 2: [] };
+        const performanceData = { 1: [], 2: [] };
+
+        // Update slider values
+        document.getElementById('temperature').addEventListener('input', (e) => {
+            document.getElementById('tempValue').textContent = e.target.value;
+        });
+        document.getElementById('maxTokens').addEventListener('input', (e) => {
+            document.getElementById('tokensValue').textContent = e.target.value;
+        });
+        document.getElementById('topP').addEventListener('input', (e) => {
+            document.getElementById('topPValue').textContent = e.target.value;
+        });
+
+        function toggleCompareMode() {
+            compareMode = !compareMode;
+            document.getElementById('compareToggle').classList.toggle('active');
+            document.getElementById('playgroundGrid').classList.toggle('compare-mode');
+            document.getElementById('panel2').style.display = compareMode ? 'flex' : 'none';
+
+            if (compareMode) {
+                // Sync prompts in compare mode
+                syncPrompts();
+            }
+        }
+
+        function syncPrompts() {
+            const prompt1 = document.getElementById('prompt1').value;
+            document.getElementById('prompt2').value = prompt1;
+        }
+
+        function updatePanelModel(panelId) {
+            const select = document.getElementById(`llmSelect${panelId}`);
+            const model = select.value;
+
+            if (model) {
+                document.getElementById(`metrics${panelId}`).style.display = 'flex';
+            }
+        }
+
+        function useSamplePrompt(prompt) {
+            document.getElementById('prompt1').value = prompt;
+            if (compareMode) {
+                document.getElementById('prompt2').value = prompt;
+            }
+        }
+
+        async function sendPrompt(panelId) {
+            const promptInput = document.getElementById(`prompt${panelId}`);
+            const prompt = promptInput.value.trim();
+            const model = document.getElementById(`llmSelect${panelId}`).value;
+
+            if (!prompt || !model) {
+                alert('Please select a model and enter a prompt');
+                return;
+            }
+
+            // Add user message
+            addMessage(panelId, 'user', prompt);
+            promptInput.value = '';
+
+            // Disable send button
+            const sendBtn = document.getElementById(`sendBtn${panelId}`);
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
+            const startTime = Date.now();
+
+            try {
+                // Simulate API call (replace with actual LLM API call)
+                const response = await simulateLLMResponse(model, prompt, panelId);
+
+                const endTime = Date.now();
+                const responseTime = ((endTime - startTime) / 1000).toFixed(2);
+
+                // Add assistant message
+                addMessage(panelId, 'assistant', response.text, {
+                    responseTime: responseTime + 's',
+                    tokens: response.tokens,
+                    cost: '$' + response.cost
+                });
+
+                // Update metrics
+                updateMetrics(panelId, responseTime, response.tokens, response.cost);
+
+                // Update performance chart
+                performanceData[panelId].push(parseFloat(responseTime));
+                updatePerformanceChart();
+
+            } catch (error) {
+                addMessage(panelId, 'assistant', 'Error: ' + error.message);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send';
+            }
+
+            // In compare mode, send to both panels
+            if (compareMode && panelId === 1) {
+                setTimeout(() => sendPrompt(2), 100);
+            }
+        }
+
+        async function simulateLLMResponse(model, prompt, panelId) {
+            // Simulate different response times and costs based on model and GPU
+            const gpuType = document.getElementById('gpuType').value;
+            const gpuCount = parseInt(document.getElementById('gpuCount').value);
+
+            const modelConfigs = {
+                'gpt4': { baseTime: 2.5, baseCost: 0.03, tokensPerSec: 40 },
+                'claude-sonnet': { baseTime: 1.8, baseCost: 0.025, tokensPerSec: 50 },
+                'llama3-70b': { baseTime: 1.2, baseCost: 0.015, tokensPerSec: 60 },
+                'mistral-large': { baseTime: 1.0, baseCost: 0.012, tokensPerSec: 70 },
+                'gemini-pro': { baseTime: 2.0, baseCost: 0.02, tokensPerSec: 45 }
+            };
+
+            const config = modelConfigs[model];
+            const gpuMultiplier = { 'h100': 1.0, 'a100': 1.2, 'v100': 1.5, 'l40': 1.1 };
+            const countMultiplier = 1 / Math.sqrt(gpuCount);
+
+            const adjustedTime = config.baseTime * gpuMultiplier[gpuType] * countMultiplier;
+
+            // Simulate delay
+            await new Promise(resolve => setTimeout(resolve, adjustedTime * 1000));
+
+            const tokens = Math.floor(150 + Math.random() * 200);
+            const cost = (config.baseCost * tokens / 1000).toFixed(4);
+
+            return {
+                text: `[${model.toUpperCase()}] This is a simulated response to: "${prompt}"\n\nIn a production environment, this would be the actual LLM response from ${model} running on ${gpuCount}x ${gpuType.toUpperCase()} GPU(s).\n\nThe model would generate a contextual response based on the prompt using the configured parameters:\n- Temperature: ${document.getElementById('temperature').value}\n- Max Tokens: ${document.getElementById('maxTokens').value}\n- Top P: ${document.getElementById('topP').value}`,
+                tokens: tokens,
+                cost: cost
+            };
+        }
+
+        function addMessage(panelId, role, content, meta = null) {
+            const chatContainer = document.getElementById(`chat${panelId}`);
+
+            // Clear placeholder if exists
+            if (chatContainer.children.length === 1 && chatContainer.querySelector('i.fa-comments')) {
+                chatContainer.innerHTML = '';
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.innerHTML = `<i class="fas fa-${role === 'user' ? 'user' : 'robot'}"></i>`;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+
+            if (meta) {
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'message-meta';
+                metaDiv.innerHTML = `
+                    <span><i class="fas fa-clock"></i> ${meta.responseTime}</span>
+                    <span><i class="fas fa-comment"></i> ${meta.tokens} tokens</span>
+                    <span><i class="fas fa-dollar-sign"></i> ${meta.cost}</span>
+                `;
+                contentDiv.appendChild(metaDiv);
+            }
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            chatHistories[panelId].push({ role, content, meta });
+        }
+
+        function updateMetrics(panelId, responseTime, tokens, cost) {
+            document.getElementById(`responseTime${panelId}`).textContent = responseTime + 's';
+            document.getElementById(`tokens${panelId}`).textContent = tokens;
+            document.getElementById(`cost${panelId}`).textContent = '$' + cost;
+        }
+
+        function updatePerformanceChart() {
+            const chart = document.getElementById('performanceChart');
+            chart.innerHTML = '';
+
+            const maxData = Math.max(...performanceData[1], ...performanceData[2], 1);
+            const lastN = 5; // Show last 5 responses
+
+            const data1 = performanceData[1].slice(-lastN);
+            const data2 = compareMode ? performanceData[2].slice(-lastN) : [];
+
+            for (let i = 0; i < lastN; i++) {
+                if (data1[i] !== undefined || data2[i] !== undefined) {
+                    const bar = document.createElement('div');
+                    bar.className = 'chart-bar';
+                    const height = ((data1[i] || 0) / maxData * 100);
+                    bar.style.height = height + '%';
+                    bar.innerHTML = `<div class="chart-label">#${i + 1}</div>`;
+                    chart.appendChild(bar);
+                }
+            }
+        }
+
+        function clearChat(panelId) {
+            const chatContainer = document.getElementById(`chat${panelId}`);
+            chatContainer.innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); padding: 3rem;">
+                    <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <p>Chat cleared. Enter a new prompt to continue.</p>
+                </div>
+            `;
+            chatHistories[panelId] = [];
+            performanceData[panelId] = [];
+            updatePerformanceChart();
+        }
+
+        // Load deployed LLM services
+        async function loadDeployedServices() {
+            // In production, fetch from localStorage or API
+            // For now, using static options
+        }
+
+        loadDeployedServices();
+    </script>
+</body>
+</html>
