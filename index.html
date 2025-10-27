@@ -3,213 +3,670 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cisco Cloud Management Platform - Login</title>
+    <title>Cisco AI Cloud Management Platform - GPU & AI Services</title>
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .login-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-
-        .login-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-cisco);
-            border-radius: 16px;
-            padding: 3rem;
-            max-width: 450px;
+        /* Landing Page Specific Styles */
+        .landing-container {
             width: 100%;
-            box-shadow: var(--shadow-lg);
-            backdrop-filter: blur(10px);
+            overflow-x: hidden;
         }
 
-        .login-logo {
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #000 0%, #0a0a0a 100%);
+            padding: 80px 0 60px;
             text-align: center;
-            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .login-logo-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--cisco-blue);
-            border-radius: 16px;
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(4, 159, 217, 0.1) 0%, transparent 70%);
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--cisco-blue) 0%, var(--accent-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .cta-button {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
+            gap: 0.5rem;
+        }
+
+        .cta-primary {
+            background: var(--cisco-blue);
             color: white;
+        }
+
+        .cta-primary:hover {
+            background: var(--cisco-blue-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: var(--cisco-blue);
+            border: 2px solid var(--cisco-blue);
+        }
+
+        .cta-secondary:hover {
+            background: rgba(4, 159, 217, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Services Showcase */
+        .services-section {
+            padding: 80px 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .section-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--cisco-blue);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .service-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: var(--cisco-blue);
+        }
+
+        .service-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .service-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .service-price {
+            font-size: 1.3rem;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* Offers Banner */
+        .offers-section {
+            background: linear-gradient(135deg, var(--cisco-blue) 0%, var(--cisco-blue-dark) 100%);
+            padding: 60px 2rem;
+            text-align: center;
+        }
+
+        .offers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 3rem auto 0;
+        }
+
+        .offer-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .offer-card:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .offer-badge {
+            background: var(--accent-green);
+            color: #000;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
             margin-bottom: 1rem;
         }
 
-        .login-title {
-            font-size: 1.75rem;
+        .offer-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .offer-description {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+        }
+
+        .offer-discount {
+            font-size: 2rem;
+            color: var(--accent-green);
             font-weight: 700;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--cisco-blue-light) 0%, var(--accent-green) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        .login-subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 2rem;
+        /* Features Section */
+        .features-section {
+            padding: 80px 2rem;
+            background: var(--bg-primary);
         }
 
-        .role-selector {
-            margin-bottom: 2rem;
-        }
-
-        .role-grid {
+        .features-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin-top: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 3rem auto 0;
         }
 
-        .role-option {
-            background: var(--bg-elevated);
-            border: 2px solid var(--border-accent);
-            border-radius: 12px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
+        .feature-item {
             text-align: center;
+            padding: 2rem;
         }
 
-        .role-option:hover {
-            border-color: var(--cisco-blue);
-            background: rgba(4, 159, 217, 0.1);
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--cisco-blue);
+            margin-bottom: 1rem;
         }
 
-        .role-option.selected {
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+        }
+
+        /* Login Section */
+        .login-section {
+            padding: 80px 2rem;
+            background: var(--bg-secondary);
+        }
+
+        .login-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 12px;
+            padding: 3rem;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
             border-color: var(--cisco-blue);
-            background: rgba(4, 159, 217, 0.15);
             box-shadow: 0 0 0 3px rgba(4, 159, 217, 0.1);
         }
 
-        .role-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .role-name {
-            font-weight: 600;
+        .form-select option {
+            background: var(--bg-tertiary);
             color: var(--text-primary);
-            font-size: 1rem;
         }
 
-        .role-description {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: var(--cisco-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
         }
 
-        .login-actions {
-            margin-top: 2rem;
+        .btn-login:hover {
+            background: var(--cisco-blue-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
         }
 
-        .language-selector-login {
-            margin-top: 2rem;
+        /* Stats Section */
+        .stats-section {
+            padding: 60px 2rem;
+            background: var(--bg-tertiary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
             text-align: center;
         }
 
-        .language-selector-login select {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border-accent);
+        .stat-item {
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            color: var(--cisco-blue);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
             color: var(--text-secondary);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .cta-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .services-grid, .features-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="bg-animation"></div>
-
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-logo">
-                <div class="login-logo-icon">
-                    <i class="fas fa-cloud"></i>
-                </div>
-                <h1 class="login-title" data-i18n="appName">Cisco Cloud Management Platform</h1>
-                <p class="login-subtitle" data-i18n="selectRole">Select Your Role</p>
-            </div>
-
-            <div class="role-selector">
-                <div class="role-grid">
-                    <div class="role-option" onclick="selectRole('csp-admin')" id="role-csp-admin">
-                        <div class="role-icon">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                        <div class="role-name" data-i18n="cspAdmin">Cloud Service Provider Admin</div>
-                        <div class="role-description">Manage tenants and GPU allocation</div>
-                    </div>
-
-                    <div class="role-option" onclick="selectRole('tenant-admin')" id="role-tenant-admin">
-                        <div class="role-icon">
-                            <i class="fas fa-user-cog"></i>
-                        </div>
-                        <div class="role-name" data-i18n="tenantAdmin">Tenant Administrator</div>
-                        <div class="role-description">Enable services and manage users</div>
-                    </div>
-
-                    <div class="role-option" onclick="selectRole('tenant-user')" id="role-tenant-user">
-                        <div class="role-icon">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div class="role-name" data-i18n="tenantUser">Tenant User</div>
-                        <div class="role-description">Consume and deploy services</div>
-                    </div>
+    <div class="landing-container">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Cisco AI Cloud Management Platform</h1>
+                <p class="hero-subtitle">
+                    Enterprise-Grade GPU Infrastructure & AI Services on Demand
+                    <br>Scale Your AI Workloads with Confidence
+                </p>
+                <div class="hero-cta">
+                    <a href="#login" class="cta-button cta-primary">
+                        <i class="fas fa-rocket"></i>
+                        Get Started Now
+                    </a>
+                    <a href="#services" class="cta-button cta-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        Explore Services
+                    </a>
                 </div>
             </div>
+        </section>
 
-            <div class="form-group">
-                <label class="form-label" data-i18n="email">Email</label>
-                <input type="email" class="form-input" id="email" placeholder="Enter your email" data-i18n-placeholder="email">
+        <!-- Stats Section -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">5000+</div>
+                    <div class="stat-label">GPU Instances</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime SLA</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Enterprise Clients</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Expert Support</div>
+                </div>
             </div>
+        </section>
 
-            <div class="form-group">
-                <label class="form-label" data-i18n="password">Password</label>
-                <input type="password" class="form-input" id="password" placeholder="Enter your password" data-i18n-placeholder="password">
+        <!-- Offers Section -->
+        <section class="offers-section">
+            <div class="section-container">
+                <h2 class="section-title" style="color: white;">Limited Time Offers</h2>
+                <p class="section-subtitle" style="color: rgba(255,255,255,0.9);">Start Your AI Journey with Exclusive Discounts</p>
+
+                <div class="offers-grid">
+                    <div class="offer-card">
+                        <div class="offer-badge">NEW CUSTOMER</div>
+                        <h3 class="offer-title">30% OFF First Month</h3>
+                        <p class="offer-description">Get started with any GPU instance and save 30% on your first month</p>
+                        <div class="offer-discount">$299/mo*</div>
+                    </div>
+
+                    <div class="offer-card">
+                        <div class="offer-badge">ENTERPRISE</div>
+                        <h3 class="offer-title">Free Migration Support</h3>
+                        <p class="offer-description">Migrate your AI workloads with our expert team at no cost</p>
+                        <div class="offer-discount">FREE</div>
+                    </div>
+
+                    <div class="offer-card">
+                        <div class="offer-badge">ANNUAL PLAN</div>
+                        <h3 class="offer-title">Save Up to 40%</h3>
+                        <p class="offer-description">Commit to annual billing and get massive savings on all services</p>
+                        <div class="offer-discount">40% OFF</div>
+                    </div>
+                </div>
             </div>
+        </section>
 
-            <div class="login-actions">
-                <button class="btn btn-primary" style="width: 100%;" onclick="login()" data-i18n="signIn">
+        <!-- Services Section -->
+        <section class="services-section" id="services">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 class="section-title">AI Services Portfolio</h2>
+                    <p class="section-subtitle">Complete Suite of AI & GPU Services for Every Use Case</p>
+                </div>
+
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon">🤖</div>
+                        <h3 class="service-title">LLM as a Service</h3>
+                        <p class="service-description">
+                            Deploy Claude, GPT-4, Llama models instantly. Enterprise-grade LLM APIs with guaranteed uptime.
+                        </p>
+                        <div class="service-price">From $0.50/1K tokens</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">⚡</div>
+                        <h3 class="service-title">GPU VM as a Service</h3>
+                        <p class="service-description">
+                            NVIDIA A100, H100, AMD MI250X. Full control over GPU instances for training and inference.
+                        </p>
+                        <div class="service-price">From $2.50/hour</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🎯</div>
+                        <h3 class="service-title">Fine-Tuning as a Service</h3>
+                        <p class="service-description">
+                            Custom model fine-tuning with your data. Automated hyperparameter optimization included.
+                        </p>
+                        <div class="service-price">From $299/model</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">👁️</div>
+                        <h3 class="service-title">Computer Vision as a Service</h3>
+                        <p class="service-description">
+                            Object detection, image classification, OCR. Pre-trained models or custom training.
+                        </p>
+                        <div class="service-price">From $0.001/image</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">📚</div>
+                        <h3 class="service-title">RAG as a Service</h3>
+                        <p class="service-description">
+                            Build intelligent chatbots with your documents. Vector database and LLM integration included.
+                        </p>
+                        <div class="service-price">From $199/month</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🧠</div>
+                        <h3 class="service-title">Agentic AI as a Service</h3>
+                        <p class="service-description">
+                            Autonomous AI agents that can use tools and make decisions. Multi-agent orchestration.
+                        </p>
+                        <div class="service-price">From $499/month</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🛠️</div>
+                        <h3 class="service-title">Build Your Own AI</h3>
+                        <p class="service-description">
+                            Full development environment with Jupyter, PyTorch, TensorFlow. Persistent storage included.
+                        </p>
+                        <div class="service-price">From $1.50/hour</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">🖥️</div>
+                        <h3 class="service-title">Bare Metal as a Service</h3>
+                        <p class="service-description">
+                            Dedicated servers with direct GPU access. Maximum performance for demanding workloads.
+                        </p>
+                        <div class="service-price">From $5,999/month</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">📦</div>
+                        <h3 class="service-title">Bring Your Own Model</h3>
+                        <p class="service-description">
+                            Deploy your custom models with our managed infrastructure. Auto-scaling and monitoring.
+                        </p>
+                        <div class="service-price">From $399/month</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 class="section-title">Why Choose Cisco AI Cloud</h2>
+                    <p class="section-subtitle">Enterprise Features Built for Scale and Security</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                        <h3 class="feature-title">Enterprise Security</h3>
+                        <p class="feature-description">SOC 2, ISO 27001, HIPAA compliant infrastructure</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fas fa-globe"></i></div>
+                        <h3 class="feature-title">Global Availability</h3>
+                        <p class="feature-description">15+ data centers across 5 continents</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                        <h3 class="feature-title">Auto-Scaling</h3>
+                        <p class="feature-description">Scale from 1 to 1000 GPUs in minutes</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fas fa-clock"></i></div>
+                        <h3 class="feature-title">99.9% Uptime SLA</h3>
+                        <p class="feature-description">Enterprise-grade reliability guaranteed</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fas fa-headset"></i></div>
+                        <h3 class="feature-title">24/7 Support</h3>
+                        <p class="feature-description">Expert AI engineers available anytime</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fas fa-dollar-sign"></i></div>
+                        <h3 class="feature-title">Pay-As-You-Go</h3>
+                        <p class="feature-description">No long-term contracts, cancel anytime</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fas fa-language"></i></div>
+                        <h3 class="feature-title">Multi-Language</h3>
+                        <p class="feature-description">Support for 5 languages globally</p>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon"><i class="fas fa-code"></i></div>
+                        <h3 class="feature-title">Full API Access</h3>
+                        <p class="feature-description">REST APIs, SDKs, and CLI tools</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Section -->
+        <section class="login-section" id="login">
+            <div class="login-container">
+                <h2 class="login-title">Access Your Dashboard</h2>
+
+                <div class="form-group">
+                    <label class="form-label">Select Your Role</label>
+                    <select id="roleSelect" class="form-select">
+                        <option value="csp-admin">☁️ Cloud Service Provider Admin - Manage Infrastructure</option>
+                        <option value="tenant-admin">🏢 Tenant Administrator - Manage Team & Services</option>
+                        <option value="tenant-user">👤 Tenant User - Deploy & Use Services</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="email" placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="password" placeholder="Enter your password">
+                </div>
+
+                <button class="btn-login" onclick="login()">
                     <i class="fas fa-sign-in-alt"></i>
-                    Sign In
+                    Sign In to Dashboard
                 </button>
-            </div>
 
-            <div class="language-selector-login">
-                <select onchange="changeLang(this.value)" id="languageSelect">
-                    <option value="en">English</option>
-                    <option value="ja">日本語 (Japanese)</option>
-                    <option value="id">Bahasa Indonesia</option>
-                    <option value="hi">हिंदी (Hindi)</option>
-                    <option value="mr">मराठी (Marathi)</option>
-                </select>
+                <div style="text-align: center; margin-top: 1.5rem; color: var(--text-muted);">
+                    <small>Demo Mode: Use any email/password to login</small>
+                </div>
             </div>
-        </div>
+        </section>
     </div>
 
     <script src="js/i18n.js"></script>
     <script src="js/mock-data.js"></script>
     <script>
-        let selectedRole = 'csp-admin';
-
-        function selectRole(role) {
-            selectedRole = role;
-            document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
-            document.getElementById('role-' + role).classList.add('selected');
-        }
-
         function login() {
+            const role = document.getElementById('roleSelect').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
@@ -219,25 +676,39 @@
             }
 
             // Store user session
-            sessionStorage.setItem('role', selectedRole);
+            sessionStorage.setItem('role', role);
             sessionStorage.setItem('email', email);
 
             // Redirect based on role
-            if (selectedRole === 'csp-admin') {
+            if (role === 'csp-admin') {
                 window.location.href = 'csp-admin.html';
-            } else if (selectedRole === 'tenant-admin') {
+            } else if (role === 'tenant-admin') {
                 window.location.href = 'tenant-admin.html';
-            } else if (selectedRole === 'tenant-user') {
+            } else {
                 window.location.href = 'tenant-user.html';
             }
         }
 
-        // Set initial selected role
-        document.getElementById('role-csp-admin').classList.add('selected');
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
 
-        // Set language from storage
-        const savedLang = localStorage.getItem('lang') || 'en';
-        document.getElementById('languageSelect').value = savedLang;
+        // Allow Enter key to login
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
     </script>
 </body>
 </html>
