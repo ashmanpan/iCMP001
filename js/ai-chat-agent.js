@@ -180,7 +180,7 @@ class AIChatAgent {
                     position: fixed;
                     bottom: 100px;
                     right: 2rem;
-                    width: 400px;
+                    width: 500px;
                     max-height: 600px;
                     background: var(--bg-card);
                     border: 1px solid var(--border-cisco);
@@ -266,7 +266,7 @@ class AIChatAgent {
                     background: var(--bg-elevated);
                     padding: 0.75rem 1rem;
                     border-radius: 12px;
-                    max-width: 280px;
+                    max-width: 350px;
                     line-height: 1.5;
                 }
 
