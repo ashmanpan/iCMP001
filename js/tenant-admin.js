@@ -131,16 +131,33 @@ const tenantUsers = [
 
 // Show section
 function showSection(sectionId) {
+    // Hide all sections
     document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
     });
-    document.getElementById(sectionId).classList.add('active');
 
+    // Show selected section
+    const selectedSection = document.getElementById(sectionId);
+    if (selectedSection) {
+        selectedSection.classList.add('active');
+    }
+
+    // Remove active state from all menu items
     document.querySelectorAll('.menu-item').forEach(item => {
         item.classList.remove('active');
     });
-    event.target.closest('.menu-item').classList.add('active');
 
+    // Add active state to clicked menu item
+    // Find the menu item that corresponds to this section
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        const onclickAttr = item.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(`'${sectionId}'`)) {
+            item.classList.add('active');
+        }
+    });
+
+    // Load section-specific data
     if (sectionId === 'catalog') {
         // Service catalog is static HTML, no need to load
     } else if (sectionId === 'services') {

@@ -607,6 +607,31 @@ body {
     padding: 0.5rem;
 }
 
+/* Section Navigation */
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+/* Menu Items */
+.menu-item {
+    transition: all 0.2s ease;
+}
+
+.menu-item:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.menu-item.active {
+    background: var(--bg-tertiary);
+    color: var(--cisco-blue);
+    border-left: 3px solid var(--cisco-blue);
+}
+
 /* Improve select element visibility */
 .form-select {
     background-color: var(--bg-tertiary);
