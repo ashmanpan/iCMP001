@@ -37,9 +37,11 @@ class AIChatAgent {
                 <ul>
                     <li>Create and manage tenants</li>
                     <li>Enable and configure services</li>
-                    <li>Allocate GPU resources</li>
-                    <li>Monitor platform usage</li>
-                    <li>Manage billing and subscriptions</li>
+                    <li>Allocate and monitor GPU resources</li>
+                    <li>Check performance and health metrics</li>
+                    <li>Troubleshoot platform issues</li>
+                    <li>Log support cases and track incidents</li>
+                    <li>View analytics and billing insights</li>
                 </ul>
                 How can I assist you today?`,
             'tenant-admin': `Hello! I'm your Tenant Admin AI Assistant. I can help you with:
@@ -64,9 +66,11 @@ class AIChatAgent {
                 { icon: 'rocket', label: 'Get Started', message: 'How do I get started?' }
             ],
             'csp-admin': [
-                { icon: 'users', label: 'Show Tenants', message: 'Show me all tenants' },
-                { icon: 'microchip', label: 'GPU Status', message: 'Show GPU availability' },
-                { icon: 'chart-bar', label: 'Usage Stats', message: 'Show consumption rates' }
+                { icon: 'users', label: 'Show Tenants', message: 'Show me all tenants and their status' },
+                { icon: 'microchip', label: 'GPU Status', message: 'Show GPU availability and allocation' },
+                { icon: 'chart-line', label: 'Performance', message: 'Check platform performance and health metrics' },
+                { icon: 'tools', label: 'Troubleshoot', message: 'Help me troubleshoot platform issues' },
+                { icon: 'ticket-alt', label: 'Log Case', message: 'I need to log a support case' }
             ],
             'tenant-admin': [
                 { icon: 'server', label: 'My Services', message: 'Show my deployed services' },

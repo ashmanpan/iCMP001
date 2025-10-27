@@ -1113,17 +1113,21 @@
                 title: 'CSP Admin AI Assistant',
                 welcomeMessage: `Hello! I'm your CSP Admin AI Assistant. 🎯 I can help you:
                     <ul>
-                        <li><strong>Create Tenants</strong> - Set up new tenant accounts</li>
-                        <li><strong>Enable Services</strong> - Activate AI/ML services for tenants</li>
-                        <li><strong>Manage GPUs</strong> - Allocate and monitor GPU resources</li>
-                        <li><strong>View Analytics</strong> - Platform usage and billing insights</li>
-                        <li><strong>Configure Settings</strong> - Platform-wide configurations</li>
+                        <li><strong>Tenant Management</strong> - Create and manage tenant accounts</li>
+                        <li><strong>Service Enablement</strong> - Activate AI/ML services for tenants</li>
+                        <li><strong>Resource Management</strong> - Allocate and monitor GPU resources</li>
+                        <li><strong>Performance Monitoring</strong> - Check system health and metrics</li>
+                        <li><strong>Troubleshooting</strong> - Diagnose and resolve platform issues</li>
+                        <li><strong>Case Management</strong> - Log support cases and track incidents</li>
+                        <li><strong>Analytics & Reports</strong> - Platform usage and billing insights</li>
                     </ul>
                     Just tell me what you'd like to do!`,
                 quickActions: [
                     { icon: 'users', label: 'Show Tenants', message: 'Show me all tenants and their status' },
                     { icon: 'microchip', label: 'GPU Status', message: 'Show GPU availability and allocation' },
-                    { icon: 'chart-bar', label: 'Platform Stats', message: 'Show platform usage and consumption rates' }
+                    { icon: 'chart-line', label: 'Performance', message: 'Check platform performance and health metrics' },
+                    { icon: 'tools', label: 'Troubleshoot', message: 'Help me troubleshoot platform issues' },
+                    { icon: 'ticket-alt', label: 'Log Case', message: 'I need to log a support case' }
                 ]
             });
         });
