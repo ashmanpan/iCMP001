@@ -271,6 +271,22 @@ body {
     color: var(--text-primary);
 }
 
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-size: 1rem;
+}
+
+.btn-icon:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
 .btn-success {
     background: var(--accent-green);
     color: var(--bg-primary);

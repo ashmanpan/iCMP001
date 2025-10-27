@@ -299,28 +299,9 @@
                         <h3 class="card-title">
                             <i class="fas fa-server"></i> My Deployed Services
                         </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Manage and monitor your active deployments</p>
                     </div>
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Service Name</th>
-                                    <th>Type</th>
-                                    <th>Configuration</th>
-                                    <th>Status</th>
-                                    <th>Deployed</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="deployedServicesTable">
-                                <tr>
-                                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
-                                        No services deployed yet. Click "Deploy" on any service above to get started.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    <div class="grid grid-3 gap-lg" id="deployedServicesGrid" style="padding: 1.5rem;"></div>
                 </div>
             </div>
 

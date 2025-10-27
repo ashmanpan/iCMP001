@@ -9,6 +9,119 @@ if (!sessionStorage.getItem('role') || sessionStorage.getItem('role') !== 'tenan
 const tenantId = sessionStorage.getItem('tenantId') || 'tenant-001';
 let currentTenant = null;
 
+// Deployed Services Database (localStorage)
+function getDeployedServices() {
+    const key = `deployedServices_${tenantId}`;
+    const services = localStorage.getItem(key);
+    return services ? JSON.parse(services) : [];
+}
+
+function saveDeployedService(service) {
+    const services = getDeployedServices();
+    service.id = 'svc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    service.tenantId = tenantId;
+    service.createdAt = new Date().toISOString();
+    service.status = 'provisioning';
+    services.push(service);
+    localStorage.setItem(`deployedServices_${tenantId}`, JSON.stringify(services));
+    return service.id;
+}
+
+function updateDeployedService(serviceId, updates) {
+    const services = getDeployedServices();
+    const index = services.findIndex(s => s.id === serviceId);
+    if (index !== -1) {
+        services[index] = { ...services[index], ...updates, updatedAt: new Date().toISOString() };
+        localStorage.setItem(`deployedServices_${tenantId}`, JSON.stringify(services));
+        return true;
+    }
+    return false;
+}
+
+function deleteDeployedService(serviceId) {
+    const services = getDeployedServices();
+    const filtered = services.filter(s => s.id !== serviceId);
+    localStorage.setItem(`deployedServices_${tenantId}`, JSON.stringify(filtered));
+    loadDeployedServices();
+}
+
+function loadDeployedServices() {
+    const services = getDeployedServices();
+    const servicesGrid = document.getElementById('deployedServicesGrid');
+
+    if (!servicesGrid) return;
+
+    if (services.length === 0) {
+        servicesGrid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <i class="fas fa-box-open" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                <p class="text-muted">No services deployed yet. Visit the Deploy Services section to get started!</p>
+            </div>
+        `;
+        return;
+    }
+
+    servicesGrid.innerHTML = services.map(service => `
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                <div>
+                    <h4 style="margin-bottom: 0.5rem;">${service.name}</h4>
+                    <span class="badge ${service.status === 'active' ? 'badge-success' : service.status === 'provisioning' ? 'badge-warning' : 'badge-secondary'}">
+                        ${service.status.toUpperCase()}
+                    </span>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn-icon" onclick="editService('${service.id}')" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-icon" onclick="confirmDeleteService('${service.id}', '${service.name}')" title="Delete" style="color: var(--danger);">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-sm text-muted" style="margin-bottom: 1rem;">
+                <div><strong>Type:</strong> ${service.type}</div>
+                ${service.model ? `<div><strong>Model:</strong> ${service.model}</div>` : ''}
+                ${service.endpoint ? `<div><strong>Endpoint:</strong> <code style="font-size: 0.75rem;">${service.endpoint}</code></div>` : ''}
+                <div><strong>Created:</strong> ${new Date(service.createdAt).toLocaleString()}</div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+                ${service.status === 'active' && service.endpoint ? `
+                    <button class="btn btn-sm btn-secondary" onclick="viewServiceDetails('${service.id}')">
+                        <i class="fas fa-info-circle"></i> Details
+                    </button>
+                ` : ''}
+                ${service.status === 'provisioning' ? `
+                    <button class="btn btn-sm btn-secondary" disabled>
+                        <i class="fas fa-spinner fa-spin"></i> Provisioning...
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function confirmDeleteService(serviceId, serviceName) {
+    if (confirm(`Are you sure you want to delete "${serviceName}"?\n\nThis action cannot be undone and will terminate all running instances.`)) {
+        deleteDeployedService(serviceId);
+        alert(`Service "${serviceName}" has been deleted successfully.`);
+    }
+}
+
+function viewServiceDetails(serviceId) {
+    const services = getDeployedServices();
+    const service = services.find(s => s.id === serviceId);
+    if (service) {
+        alert(`Service Details:\n\nName: ${service.name}\nType: ${service.type}\nStatus: ${service.status}\nModel: ${service.model || 'N/A'}\nEndpoint: ${service.endpoint || 'Provisioning...'}\nAPI Key: ${service.apiKey || 'Will be sent via email'}\n\nCreated: ${new Date(service.createdAt).toLocaleString()}`);
+    }
+}
+
+function editService(serviceId) {
+    alert('Edit functionality will open a modal to modify service configuration.\n\nComing soon: Update GPU allocation, scaling settings, and more.');
+}
+
 // Mock users for this tenant
 const tenantUsers = [
     { id: 'user-001', name: 'John Doe', email: 'john@techcorp.com', role: 'User', status: 'Active' },
@@ -31,7 +144,7 @@ function showSection(sectionId) {
     if (sectionId === 'catalog') {
         // Service catalog is static HTML, no need to load
     } else if (sectionId === 'services') {
-        loadServices();
+        loadDeployedServices();  // Load deployed services
     } else if (sectionId === 'users') {
         loadUsers();
     } else if (sectionId === 'billing') {
@@ -299,20 +412,36 @@ function loadBilling() {
 function deployLLMService() {
     const serviceName = document.getElementById('llmServiceName').value;
     const model = document.getElementById('llmModel').value;
+    const gpuCount = document.getElementById('llmGPUSlider')?.value || 2;
 
     if (!serviceName || !model) {
         alert('Please fill in all required fields (Service Name and Model)');
         return;
     }
 
-    // Simulate deployment
-    alert(`Deploying LLM Service: ${serviceName}\nModel: ${model}\n\nDeployment started! Your service will be ready in ~5 minutes.\nYou will receive an API endpoint and credentials via email.`);
+    // Save to database
+    const serviceId = saveDeployedService({
+        name: serviceName,
+        type: 'LLM as a Service',
+        model: model,
+        gpuCount: gpuCount,
+        endpoint: `https://api.cmp.cisco.com/llm/${serviceName.toLowerCase().replace(/\s+/g, '-')}`,
+        apiKey: 'llm-' + Math.random().toString(36).substr(2, 16)
+    });
+
+    // Simulate async deployment - mark as active after 3 seconds
+    setTimeout(() => {
+        updateDeployedService(serviceId, { status: 'active' });
+        if (document.getElementById('services').classList.contains('active')) {
+            loadDeployedServices();
+        }
+    }, 3000);
+
+    alert(`Deploying LLM Service: ${serviceName}\nModel: ${model}\nGPUs: ${gpuCount}\n\nDeployment started! Service ID: ${serviceId}\n\nYour service will be ready in ~5 minutes.\nYou will receive an API endpoint and credentials via email.`);
     closeModal('deployLLMModal');
 
-    // Refresh services list
-    if (document.getElementById('services').classList.contains('active')) {
-        loadServices();
-    }
+    // Show in deployed services
+    loadDeployedServices();
 }
 
 function deployFineTuningService() {
@@ -359,14 +488,31 @@ function deployBYOMService() {
 function deployRAGService() {
     const serviceName = document.getElementById('ragServiceName')?.value || 'RAG Service';
     const llmModel = document.getElementById('ragLLMModel')?.value;
+    const vectorDB = document.getElementById('ragVectorDB')?.value;
 
     if (!serviceName || !llmModel) {
         alert('Please fill in all required fields (Service Name and LLM Model)');
         return;
     }
 
+    // Save to database
+    const serviceId = saveDeployedService({
+        name: serviceName,
+        type: 'RAG as a Service',
+        model: llmModel,
+        vectorDB: vectorDB || 'Pinecone',
+        endpoint: `https://api.cmp.cisco.com/rag/${serviceName.toLowerCase().replace(/\s+/g, '-')}`,
+        apiKey: 'rag-' + Math.random().toString(36).substr(2, 16)
+    });
+
+    setTimeout(() => {
+        updateDeployedService(serviceId, { status: 'active' });
+        if (document.getElementById('services').classList.contains('active')) loadDeployedServices();
+    }, 5000);
+
     alert(`Deploying RAG Service: ${serviceName}\nLLM: ${llmModel}\n\nDeployment started!\n\nSetting up:\n- Vector database\n- Embedding model\n- Document ingestion pipeline\n- Query API\n\nEstimated time: 10 minutes`);
     closeModal('deployRAGModal');
+    loadDeployedServices();
 }
 
 function deployAgenticService() {
