@@ -394,9 +394,36 @@
                     </div>
                 </div>
 
+                <!-- NVIDIA GPUs by Model -->
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-microchip" style="color: #76b900;"></i>
+                            NVIDIA GPUs by Model
+                        </h3>
+                    </div>
+                    <div id="nvidiaModelGrid" style="padding: 1.5rem;"></div>
+                </div>
+
+                <!-- AMD GPUs by Model -->
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-microchip" style="color: #ed1c24;"></i>
+                            AMD GPUs by Model
+                        </h3>
+                    </div>
+                    <div id="amdModelGrid" style="padding: 1.5rem;"></div>
+                </div>
+
+                <!-- All GPUs Detailed View -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">All GPUs</h3>
+                        <h3 class="card-title">All GPUs - Detailed View</h3>
+                        <button class="btn btn-secondary btn-sm" onclick="toggleGPUView()">
+                            <i class="fas fa-list"></i>
+                            Toggle View
+                        </button>
                     </div>
                     <div class="gpu-grid" id="gpuGrid"></div>
                 </div>

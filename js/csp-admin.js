@@ -193,6 +193,9 @@ function loadGPUs() {
     document.getElementById('availableCount').textContent = getAvailableGPUs().length;
     document.getElementById('allocatedCount').textContent = getAllocatedGPUs().length;
 
+    // Group GPUs by model
+    loadGPUsByModel();
+
     const gpuGrid = document.getElementById('gpuGrid');
     gpuGrid.innerHTML = allGPUs.map(gpu => `
         <div class="gpu-card ${gpu.status}">
@@ -206,6 +209,133 @@ function loadGPUs() {
             ${gpu.tenant ? `<p class="text-sm mt-sm">Tenant: ${getTenantById(gpu.tenant)?.name || 'Unknown'}</p>` : ''}
         </div>
     `).join('');
+}
+
+// Load GPUs grouped by model
+function loadGPUsByModel() {
+    // Group NVIDIA GPUs by model
+    const nvidiaGrouped = {};
+    mockGPUs.nvidia.forEach(gpu => {
+        if (!nvidiaGrouped[gpu.model]) {
+            nvidiaGrouped[gpu.model] = {
+                total: 0,
+                available: 0,
+                allocated: 0,
+                maintenance: 0,
+                memory: gpu.memory
+            };
+        }
+        nvidiaGrouped[gpu.model].total++;
+        if (gpu.status === 'available') nvidiaGrouped[gpu.model].available++;
+        else if (gpu.status === 'allocated' || gpu.status === 'in-use') nvidiaGrouped[gpu.model].allocated++;
+        else if (gpu.status === 'maintenance') nvidiaGrouped[gpu.model].maintenance++;
+    });
+
+    // Group AMD GPUs by model
+    const amdGrouped = {};
+    mockGPUs.amd.forEach(gpu => {
+        if (!amdGrouped[gpu.model]) {
+            amdGrouped[gpu.model] = {
+                total: 0,
+                available: 0,
+                allocated: 0,
+                maintenance: 0,
+                memory: gpu.memory
+            };
+        }
+        amdGrouped[gpu.model].total++;
+        if (gpu.status === 'available') amdGrouped[gpu.model].available++;
+        else if (gpu.status === 'allocated' || gpu.status === 'in-use') amdGrouped[gpu.model].allocated++;
+        else if (gpu.status === 'maintenance') amdGrouped[gpu.model].maintenance++;
+    });
+
+    // Display NVIDIA models
+    const nvidiaGrid = document.getElementById('nvidiaModelGrid');
+    nvidiaGrid.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+            ${Object.entries(nvidiaGrouped).map(([model, stats]) => `
+                <div class="card" style="background: var(--bg-tertiary); padding: 1.5rem; border: 1px solid var(--border-primary);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="font-size: 2rem; color: #76b900;">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; color: var(--text-primary);">NVIDIA ${model}</h4>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.875rem;">${stats.memory} Memory</p>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem;">
+                        <div style="text-align: center; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--cisco-blue);">${stats.total}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Total</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-green);">${stats.available}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Available</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-yellow);">${stats.allocated}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Allocated</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-red);">${stats.maintenance}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Maintenance</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    // Display AMD models
+    const amdGrid = document.getElementById('amdModelGrid');
+    amdGrid.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+            ${Object.entries(amdGrouped).map(([model, stats]) => `
+                <div class="card" style="background: var(--bg-tertiary); padding: 1.5rem; border: 1px solid var(--border-primary);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="font-size: 2rem; color: #ed1c24;">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; color: var(--text-primary);">AMD ${model}</h4>
+                            <p style="margin: 0; color: var(--text-muted); font-size: 0.875rem;">${stats.memory} Memory</p>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem;">
+                        <div style="text-align: center; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--cisco-blue);">${stats.total}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Total</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-green);">${stats.available}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Available</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-yellow);">${stats.allocated}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Allocated</div>
+                        </div>
+                        <div style="text-align: center; padding: 0.5rem; background: var(--bg-secondary); border-radius: 6px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-red);">${stats.maintenance}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Maintenance</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// Toggle GPU detailed view
+let gpuDetailedView = true;
+function toggleGPUView() {
+    gpuDetailedView = !gpuDetailedView;
+    const gpuGrid = document.getElementById('gpuGrid');
+    if (gpuDetailedView) {
+        gpuGrid.style.display = 'grid';
+    } else {
+        gpuGrid.style.display = 'none';
+    }
 }
 
 // Load Nexus Fabric

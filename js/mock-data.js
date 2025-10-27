@@ -1,24 +1,73 @@
 // Mock Data for Cisco CMP Portal
 
-// GPU Data
+// GPU Data - Latest Datacenter Models
 const mockGPUs = {
     nvidia: [
-        { id: 'gpu-001', model: 'A100', memory: '80GB', ucsServer: 'UCS-001', status: 'available', tenant: null },
-        { id: 'gpu-002', model: 'A100', memory: '80GB', ucsServer: 'UCS-001', status: 'allocated', tenant: 'tenant-001' },
-        { id: 'gpu-003', model: 'H100', memory: '80GB', ucsServer: 'UCS-002', status: 'available', tenant: null },
-        { id: 'gpu-004', model: 'H100', memory: '80GB', ucsServer: 'UCS-002', status: 'allocated', tenant: 'tenant-002' },
-        { id: 'gpu-005', model: 'V100', memory: '32GB', ucsServer: 'UCS-003', status: 'available', tenant: null },
-        { id: 'gpu-006', model: 'V100', memory: '32GB', ucsServer: 'UCS-003', status: 'allocated', tenant: 'tenant-001' },
-        { id: 'gpu-007', model: 'T4', memory: '16GB', ucsServer: 'UCS-004', status: 'available', tenant: null },
-        { id: 'gpu-008', model: 'T4', memory: '16GB', ucsServer: 'UCS-004', status: 'in-use', tenant: 'tenant-003' },
-        { id: 'gpu-009', model: 'A100', memory: '40GB', ucsServer: 'UCS-005', status: 'available', tenant: null },
-        { id: 'gpu-010', model: 'A100', memory: '40GB', ucsServer: 'UCS-005', status: 'allocated', tenant: 'tenant-002' }
+        // H200 - Latest NVIDIA GPU (141GB HBM3e)
+        { id: 'gpu-001', model: 'H200', memory: '141GB', ucsServer: 'UCS-001', status: 'available', tenant: null },
+        { id: 'gpu-002', model: 'H200', memory: '141GB', ucsServer: 'UCS-001', status: 'allocated', tenant: 'tenant-001' },
+        { id: 'gpu-003', model: 'H200', memory: '141GB', ucsServer: 'UCS-002', status: 'available', tenant: null },
+        { id: 'gpu-004', model: 'H200', memory: '141GB', ucsServer: 'UCS-002', status: 'allocated', tenant: 'tenant-002' },
+        { id: 'gpu-005', model: 'H200', memory: '141GB', ucsServer: 'UCS-003', status: 'available', tenant: null },
+
+        // H100 - High-performance AI training (80GB HBM3)
+        { id: 'gpu-006', model: 'H100', memory: '80GB', ucsServer: 'UCS-003', status: 'available', tenant: null },
+        { id: 'gpu-007', model: 'H100', memory: '80GB', ucsServer: 'UCS-004', status: 'allocated', tenant: 'tenant-001' },
+        { id: 'gpu-008', model: 'H100', memory: '80GB', ucsServer: 'UCS-004', status: 'available', tenant: null },
+        { id: 'gpu-009', model: 'H100', memory: '80GB', ucsServer: 'UCS-005', status: 'allocated', tenant: 'tenant-002' },
+        { id: 'gpu-010', model: 'H100', memory: '80GB', ucsServer: 'UCS-005', status: 'available', tenant: null },
+        { id: 'gpu-011', model: 'H100', memory: '80GB', ucsServer: 'UCS-006', status: 'allocated', tenant: 'tenant-003' },
+        { id: 'gpu-012', model: 'H100', memory: '80GB', ucsServer: 'UCS-006', status: 'available', tenant: null },
+
+        // B200 - Next-gen Blackwell Architecture
+        { id: 'gpu-013', model: 'B200', memory: '192GB', ucsServer: 'UCS-007', status: 'available', tenant: null },
+        { id: 'gpu-014', model: 'B200', memory: '192GB', ucsServer: 'UCS-007', status: 'allocated', tenant: 'tenant-001' },
+        { id: 'gpu-015', model: 'B200', memory: '192GB', ucsServer: 'UCS-008', status: 'available', tenant: null },
+
+        // A100 - Proven AI workhorse (80GB)
+        { id: 'gpu-016', model: 'A100', memory: '80GB', ucsServer: 'UCS-008', status: 'available', tenant: null },
+        { id: 'gpu-017', model: 'A100', memory: '80GB', ucsServer: 'UCS-009', status: 'allocated', tenant: 'tenant-002' },
+        { id: 'gpu-018', model: 'A100', memory: '80GB', ucsServer: 'UCS-009', status: 'available', tenant: null },
+        { id: 'gpu-019', model: 'A100', memory: '80GB', ucsServer: 'UCS-010', status: 'allocated', tenant: 'tenant-003' },
+        { id: 'gpu-020', model: 'A100', memory: '80GB', ucsServer: 'UCS-010', status: 'available', tenant: null },
+        { id: 'gpu-021', model: 'A100', memory: '80GB', ucsServer: 'UCS-011', status: 'available', tenant: null },
+        { id: 'gpu-022', model: 'A100', memory: '80GB', ucsServer: 'UCS-011', status: 'allocated', tenant: 'tenant-001' },
+        { id: 'gpu-023', model: 'A100', memory: '80GB', ucsServer: 'UCS-012', status: 'available', tenant: null },
+
+        // L40S - AI Inference optimized (48GB)
+        { id: 'gpu-024', model: 'L40S', memory: '48GB', ucsServer: 'UCS-012', status: 'available', tenant: null },
+        { id: 'gpu-025', model: 'L40S', memory: '48GB', ucsServer: 'UCS-013', status: 'allocated', tenant: 'tenant-002' },
+        { id: 'gpu-026', model: 'L40S', memory: '48GB', ucsServer: 'UCS-013', status: 'available', tenant: null },
+        { id: 'gpu-027', model: 'L40S', memory: '48GB', ucsServer: 'UCS-014', status: 'allocated', tenant: 'tenant-003' },
+
+        // L4 - Cost-effective inference (24GB)
+        { id: 'gpu-028', model: 'L4', memory: '24GB', ucsServer: 'UCS-014', status: 'available', tenant: null },
+        { id: 'gpu-029', model: 'L4', memory: '24GB', ucsServer: 'UCS-015', status: 'allocated', tenant: 'tenant-001' },
+        { id: 'gpu-030', model: 'L4', memory: '24GB', ucsServer: 'UCS-015', status: 'available', tenant: null }
     ],
     amd: [
-        { id: 'gpu-011', model: 'MI250X', memory: '128GB', ucsServer: 'UCS-006', status: 'available', tenant: null },
-        { id: 'gpu-012', model: 'MI250X', memory: '128GB', ucsServer: 'UCS-006', status: 'allocated', tenant: 'tenant-001' },
-        { id: 'gpu-013', model: 'MI210', memory: '64GB', ucsServer: 'UCS-007', status: 'available', tenant: null },
-        { id: 'gpu-014', model: 'MI210', memory: '64GB', ucsServer: 'UCS-007', status: 'maintenance', tenant: null }
+        // MI300X - Latest AMD GPU (192GB HBM3)
+        { id: 'gpu-031', model: 'MI300X', memory: '192GB', ucsServer: 'UCS-016', status: 'available', tenant: null },
+        { id: 'gpu-032', model: 'MI300X', memory: '192GB', ucsServer: 'UCS-016', status: 'allocated', tenant: 'tenant-001' },
+        { id: 'gpu-033', model: 'MI300X', memory: '192GB', ucsServer: 'UCS-017', status: 'available', tenant: null },
+        { id: 'gpu-034', model: 'MI300X', memory: '192GB', ucsServer: 'UCS-017', status: 'allocated', tenant: 'tenant-002' },
+        { id: 'gpu-035', model: 'MI300X', memory: '192GB', ucsServer: 'UCS-018', status: 'available', tenant: null },
+
+        // MI300A - APU with integrated CPU+GPU (128GB)
+        { id: 'gpu-036', model: 'MI300A', memory: '128GB', ucsServer: 'UCS-018', status: 'available', tenant: null },
+        { id: 'gpu-037', model: 'MI300A', memory: '128GB', ucsServer: 'UCS-019', status: 'allocated', tenant: 'tenant-003' },
+        { id: 'gpu-038', model: 'MI300A', memory: '128GB', ucsServer: 'UCS-019', status: 'available', tenant: null },
+
+        // MI250X - Dual-GPU package (128GB per package)
+        { id: 'gpu-039', model: 'MI250X', memory: '128GB', ucsServer: 'UCS-020', status: 'available', tenant: null },
+        { id: 'gpu-040', model: 'MI250X', memory: '128GB', ucsServer: 'UCS-020', status: 'allocated', tenant: 'tenant-001' },
+        { id: 'gpu-041', model: 'MI250X', memory: '128GB', ucsServer: 'UCS-021', status: 'available', tenant: null },
+        { id: 'gpu-042', model: 'MI250X', memory: '128GB', ucsServer: 'UCS-021', status: 'allocated', tenant: 'tenant-002' },
+
+        // MI210 - Previous generation (64GB)
+        { id: 'gpu-043', model: 'MI210', memory: '64GB', ucsServer: 'UCS-022', status: 'available', tenant: null },
+        { id: 'gpu-044', model: 'MI210', memory: '64GB', ucsServer: 'UCS-022', status: 'maintenance', tenant: null },
+        { id: 'gpu-045', model: 'MI210', memory: '64GB', ucsServer: 'UCS-023', status: 'available', tenant: null }
     ]
 };
 
