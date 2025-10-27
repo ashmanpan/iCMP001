@@ -3,16 +3,10 @@ frontend:
   phases:
     build:
       commands:
-        - echo "Building Cisco CMP Portal..."
+        - echo "Building Cisco CMP Portal - Static Site"
   artifacts:
     baseDirectory: /
     files:
       - '**/*'
   cache:
     paths: []
-backend:
-  phases:
-    build:
-      commands:
-        - '# Execute Amplify CLI with the helper script'
-        - amplifyPush --simple
