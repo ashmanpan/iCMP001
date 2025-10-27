@@ -1,7 +1,7 @@
 // AI Chat Agent Component for Cisco CMP Portal
 // Uses AWS Lambda with Anthropic Claude on Bedrock
 
-const LAMBDA_ENDPOINT = 'YOUR_LAMBDA_API_GATEWAY_ENDPOINT'; // Will be set after deployment
+const LAMBDA_ENDPOINT = 'https://eo8kg29mg3.execute-api.ap-south-1.amazonaws.com/prod/chat';
 
 class AIChatAgent {
     constructor(containerId, role, tenantId = null) {

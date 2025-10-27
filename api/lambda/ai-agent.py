@@ -8,10 +8,10 @@ bedrock = boto3.client('bedrock-runtime', region_name='ap-south-1')  # Mumbai re
 dynamodb = boto3.resource('dynamodb', region_name='ap-south-1')  # Mumbai region
 
 # DynamoDB tables
-tenants_table = dynamodb.Table('Cisco-CMP-Tenants')
-gpus_table = dynamodb.Table('Cisco-CMP-GPUs')
-logs_table = dynamodb.Table('Cisco-CMP-Logs')
-services_table = dynamodb.Table('Cisco-CMP-Services')
+tenants_table = dynamodb.Table('cisco-cmp-tenants')
+gpus_table = dynamodb.Table('cisco-cmp-gpus')
+logs_table = dynamodb.Table('cisco-cmp-logs')
+services_table = dynamodb.Table('cisco-cmp-services')
 
 def lambda_handler(event, context):
     """
@@ -220,7 +220,7 @@ def call_claude(system_prompt, user_message, context_data):
 
         # Call Bedrock
         response = bedrock.invoke_model(
-            modelId='anthropic.claude-3-sonnet-20240229-v1:0',  # Claude 3 Sonnet
+            modelId='anthropic.claude-sonnet-4-5-20250929-v1:0',  # Claude Sonnet 4.5
             body=json.dumps(request_body)
         )
 
