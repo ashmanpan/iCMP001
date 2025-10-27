@@ -194,7 +194,15 @@ function loadUsers() {
 
 // Modal functions
 function openModal(modalId) {
-    document.getElementById(modalId).classList.add('active');
+    console.log('Opening modal:', modalId);
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('active');
+        console.log('Modal opened successfully');
+    } else {
+        console.error('Modal not found:', modalId);
+        alert('Error: Modal not found. Please refresh the page and try again.');
+    }
 }
 
 function openAddUserModal() {
@@ -284,6 +292,102 @@ function loadBilling() {
             }
         }
     });
+}
+
+// Service Deployment Functions
+
+function deployLLMService() {
+    const serviceName = document.getElementById('llmServiceName').value;
+    const model = document.getElementById('llmModel').value;
+
+    if (!serviceName || !model) {
+        alert('Please fill in all required fields (Service Name and Model)');
+        return;
+    }
+
+    // Simulate deployment
+    alert(`Deploying LLM Service: ${serviceName}\nModel: ${model}\n\nDeployment started! Your service will be ready in ~5 minutes.\nYou will receive an API endpoint and credentials via email.`);
+    closeModal('deployLLMModal');
+
+    // Refresh services list
+    if (document.getElementById('services').classList.contains('active')) {
+        loadServices();
+    }
+}
+
+function deployFineTuningService() {
+    const jobName = document.getElementById('ftJobName').value;
+    const baseModel = document.getElementById('ftBaseModel').value;
+
+    if (!jobName || !baseModel) {
+        alert('Please fill in all required fields (Job Name and Base Model)');
+        return;
+    }
+
+    alert(`Starting Fine-Tuning Job: ${jobName}\nBase Model: ${baseModel}\n\nJob queued successfully! Training will begin shortly.\nYou will be notified when the job completes.`);
+    closeModal('deployFineTuningModal');
+}
+
+function deployComputerVisionService() {
+    const serviceName = document.getElementById('cvServiceName')?.value || 'CV Service';
+
+    alert(`Deploying Computer Vision Service: ${serviceName}\n\nDeployment started! Your CV service will be ready in ~3 minutes.\nAPI endpoint will be sent to your email.`);
+    closeModal('deployComputerVisionModal');
+}
+
+function deployVMService() {
+    const vmName = document.getElementById('vmName')?.value || 'GPU VM';
+
+    alert(`Deploying GPU VM: ${vmName}\n\nVM provisioning started!\n\nYou will receive:\n- SSH access credentials\n- Public IP address\n- Connection instructions\n\nEstimated time: 10 minutes`);
+    closeModal('deployVMModal');
+}
+
+function deployBareMetalService() {
+    const serverName = document.getElementById('bareMetalName')?.value || 'Bare Metal Server';
+
+    alert(`Deploying Bare Metal Server: ${serverName}\n\nServer provisioning started!\n\nYou will receive:\n- IPMI/BMC access\n- Root SSH credentials\n- Serial console access\n- Network configuration\n\nEstimated time: 20-30 minutes`);
+    closeModal('deployBareMetalModal');
+}
+
+function deployBYOMService() {
+    const serviceName = document.getElementById('byomServiceName')?.value || 'Custom Model';
+
+    alert(`Deploying BYOM Service: ${serviceName}\n\nDeployment started! Your custom model service will be containerized and deployed.\n\nEstimated time: 8-15 minutes\nYou will receive API endpoint and documentation.`);
+    closeModal('deployBYOMModal');
+}
+
+function deployRAGService() {
+    const serviceName = document.getElementById('ragServiceName')?.value || 'RAG Service';
+    const llmModel = document.getElementById('ragLLMModel')?.value;
+
+    if (!serviceName || !llmModel) {
+        alert('Please fill in all required fields (Service Name and LLM Model)');
+        return;
+    }
+
+    alert(`Deploying RAG Service: ${serviceName}\nLLM: ${llmModel}\n\nDeployment started!\n\nSetting up:\n- Vector database\n- Embedding model\n- Document ingestion pipeline\n- Query API\n\nEstimated time: 10 minutes`);
+    closeModal('deployRAGModal');
+}
+
+function deployAgenticService() {
+    const serviceName = document.getElementById('agenticServiceName')?.value || 'AI Agent';
+    const agentType = document.getElementById('agenticType')?.value;
+    const llm = document.getElementById('agenticLLM')?.value;
+
+    if (!serviceName || !agentType || !llm) {
+        alert('Please fill in all required fields (Service Name, Agent Type, and LLM)');
+        return;
+    }
+
+    alert(`Deploying Agentic AI: ${serviceName}\nType: ${agentType}\nLLM: ${llm}\n\nDeployment started!\n\nConfiguring:\n- Agent framework\n- Tool integrations\n- Memory system\n- API endpoint\n\nEstimated time: 12 minutes`);
+    closeModal('deployAgenticModal');
+}
+
+function deployBuildAIService() {
+    const envName = document.getElementById('buildAIEnvName')?.value || 'AI Workspace';
+
+    alert(`Deploying Build Your Own AI Environment: ${envName}\n\nDeployment started!\n\nSetting up:\n- Development environment\n- MLOps tools\n- Jupyter/VS Code access\n- Persistent storage\n- GPU allocation\n\nEstimated time: 15 minutes\nYou will receive access URLs and credentials.`);
+    closeModal('deployBuildAIModal');
 }
 
 // Logout
