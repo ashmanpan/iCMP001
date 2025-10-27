@@ -601,6 +601,34 @@
             <!-- Analytics Section -->
             <div id="analytics" class="section">
                 <h2 class="mb-lg">Analytics & Reports</h2>
+
+                <!-- Top 10 Tenants Revenue -->
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-bar"></i> Top 10 Tenants by Monthly Revenue
+                        </h3>
+                        <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                            Total: <strong id="totalRevenue" style="color: var(--cisco-blue);">$0</strong>/month
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Tenant</th>
+                                    <th>GPUs Allocated</th>
+                                    <th>Monthly Spend</th>
+                                    <th>% of Total Revenue</th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topTenantsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div class="grid grid-2">
                     <div class="card">
                         <div class="card-header">

@@ -587,8 +587,81 @@ function loadLogs() {
     `).join('');
 }
 
+// Load Top 10 Tenants by Revenue
+function loadTopTenants() {
+    // Sort tenants by current spend (descending) and take top 10
+    const sortedTenants = [...mockTenants]
+        .sort((a, b) => b.currentSpend - a.currentSpend)
+        .slice(0, 10);
+
+    // Calculate total revenue
+    const totalRevenue = mockTenants.reduce((sum, t) => sum + t.currentSpend, 0);
+    document.getElementById('totalRevenue').textContent =
+        `$${totalRevenue.toLocaleString()}`;
+
+    // Populate table
+    const topTenantsTable = document.getElementById('topTenantsTable');
+    topTenantsTable.innerHTML = sortedTenants.map((tenant, index) => {
+        const percentage = ((tenant.currentSpend / totalRevenue) * 100).toFixed(1);
+        const spendPercentage = (tenant.currentSpend / tenant.monthlyBudget) * 100;
+
+        // Determine trend
+        let trendIcon, trendColor, trendText;
+        if (spendPercentage > 95) {
+            trendIcon = 'fa-arrow-up';
+            trendColor = 'var(--accent-red)';
+            trendText = 'High';
+        } else if (spendPercentage > 80) {
+            trendIcon = 'fa-arrow-up';
+            trendColor = 'var(--accent-yellow)';
+            trendText = 'Growing';
+        } else if (spendPercentage > 60) {
+            trendIcon = 'fa-arrow-right';
+            trendColor = 'var(--cisco-blue)';
+            trendText = 'Stable';
+        } else {
+            trendIcon = 'fa-arrow-down';
+            trendColor = 'var(--accent-green)';
+            trendText = 'Low';
+        }
+
+        return `
+            <tr>
+                <td><strong style="color: var(--cisco-blue);">#${index + 1}</strong></td>
+                <td>${tenant.name}</td>
+                <td><strong>${tenant.allocatedGPUs}</strong> GPUs</td>
+                <td>
+                    <strong style="color: var(--accent-green); font-size: 1.1rem;">
+                        $${tenant.currentSpend.toLocaleString()}
+                    </strong>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">
+                        of $${tenant.monthlyBudget.toLocaleString()} budget
+                    </div>
+                </td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <strong style="color: var(--cisco-blue); font-size: 1.05rem;">${percentage}%</strong>
+                        <div style="flex: 1; background: var(--bg-tertiary); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${percentage}%; height: 100%; background: linear-gradient(90deg, var(--cisco-blue), var(--accent-green)); transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span style="color: ${trendColor}; display: flex; align-items: center; gap: 0.25rem;">
+                        <i class="fas ${trendIcon}"></i>
+                        ${trendText}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
 // Load Analytics
 function loadAnalytics() {
+    // Load Top 10 Tenants Revenue Table
+    loadTopTenants();
+
     // Tenant Consumption Chart
     const tenantCtx = document.getElementById('tenantConsumptionChart').getContext('2d');
     new Chart(tenantCtx, {
