@@ -1,0 +1,44 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:*:*:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel"
+      ],
+      "Resource": [
+        "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0",
+        "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Scan",
+        "dynamodb:Query"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:*:*:table/Cisco-CMP-Tenants",
+        "arn:aws:dynamodb:*:*:table/Cisco-CMP-GPUs",
+        "arn:aws:dynamodb:*:*:table/Cisco-CMP-UCSServers",
+        "arn:aws:dynamodb:*:*:table/Cisco-CMP-NexusFabric",
+        "arn:aws:dynamodb:*:*:table/Cisco-CMP-Services",
+        "arn:aws:dynamodb:*:*:table/Cisco-CMP-Logs",
+        "arn:aws:dynamodb:*:*:table/Cisco-CMP-Users"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSP Admin Dashboard - Cisco CMP</title>
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-logo {
+            padding: 0 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .menu-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: var(--bg-tertiary);
+            color: var(--cisco-blue);
+            border-left: 3px solid var(--cisco-blue);
+        }
+
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--cisco-blue-light) 0%, var(--accent-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1rem;
+        }
+
+        .gpu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .gpu-card {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-accent);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .gpu-card.available {
+            border-color: var(--accent-green);
+        }
+
+        .gpu-card.allocated {
+            border-color: var(--accent-yellow);
+        }
+
+        .gpu-card.in-use {
+            border-color: var(--cisco-blue);
+        }
+
+        .gpu-card.maintenance {
+            border-color: var(--accent-red);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border-cisco);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--cisco-blue);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .tenant-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tenant-card:hover {
+            border-color: var(--cisco-blue);
+            transform: translateY(-2px);
+        }
+
+        .tenant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .tenant-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tenant-stat {
+            text-align: center;
+        }
+
+        .tenant-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--cisco-blue);
+        }
+
+        .tenant-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <div class="brand-name">Cisco CMP</div>
+                </div>
+            </div>
+
+            <ul class="sidebar-menu">
+                <li class="menu-item active" onclick="showSection('overview')">
+                    <i class="fas fa-th-large"></i>
+                    <span data-i18n="dashboard">Dashboard</span>
+                </li>
+                <li class="menu-item" onclick="showSection('tenants')">
+                    <i class="fas fa-users"></i>
+                    <span data-i18n="tenants">Tenants</span>
+                </li>
+                <li class="menu-item" onclick="showSection('gpus')">
+                    <i class="fas fa-microchip"></i>
+                    <span data-i18n="gpus">GPUs</span>
+                </li>
+                <li class="menu-item" onclick="showSection('fabric')">
+                    <i class="fas fa-network-wired"></i>
+                    <span data-i18n="nexusFabric">Nexus Fabric</span>
+                </li>
+                <li class="menu-item" onclick="showSection('logs')">
+                    <i class="fas fa-file-alt"></i>
+                    <span data-i18n="logs">Logs</span>
+                </li>
+                <li class="menu-item" onclick="showSection('analytics')">
+                    <i class="fas fa-chart-line"></i>
+                    <span data-i18n="analytics">Analytics</span>
+                </li>
+                <li class="menu-item" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span data-i18n="logout">Logout</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="page-header flex-between">
+                <div>
+                    <h1 class="page-title" data-i18n="cspAdminTitle">CSP Admin Dashboard</h1>
+                    <p class="text-muted">Manage tenants, GPUs, and infrastructure</p>
+                </div>
+                <div class="flex gap-md">
+                    <select onchange="changeLang(this.value)" id="langSelect" class="form-select" style="width: auto;">
+                        <option value="en">English</option>
+                        <option value="ja">日本語</option>
+                        <option value="id">Bahasa</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="mr">मराठी</option>
+                    </select>
+                    <div class="user-profile">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="status-indicator"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overview Section -->
+            <div id="overview" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-label" data-i18n="totalTenants">Total Tenants</div>
+                        <div class="stat-value" id="totalTenants">0</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> 12% this month
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="stat-label" data-i18n="totalGPUs">Total GPUs Discovered</div>
+                        <div class="stat-value" id="totalGPUs">0</div>
+                        <div class="stat-change">
+                            <span class="badge badge-success">All Online</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="stat-label" data-i18n="ciscoUCS">Cisco UCS Servers</div>
+                        <div class="stat-value" id="totalUCS">0</div>
+                        <div class="stat-change">
+                            <span class="badge badge-info">Nexus Connected</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-label" data-i18n="consumptionRate">Avg Consumption Rate</div>
+                        <div class="stat-value">67.9%</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> 5.2%
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-2 mt-lg">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">GPU Distribution</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="gpuChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title" data-i18n="consumptionTrend">Consumption Trend</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="consumptionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Tenants</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openCreateTenantModal()">
+                            <i class="fas fa-plus"></i>
+                            <span data-i18n="createTenant">Create Tenant</span>
+                        </button>
+                    </div>
+                    <div id="tenantsOverview"></div>
+                </div>
+            </div>
+
+            <!-- Tenants Section -->
+            <div id="tenants" class="section">
+                <div class="flex-between mb-lg">
+                    <h2>Tenant Management</h2>
+                    <button class="btn btn-primary" onclick="openCreateTenantModal()">
+                        <i class="fas fa-plus"></i>
+                        <span data-i18n="createTenant">Create Tenant</span>
+                    </button>
+                </div>
+                <div id="tenantsList"></div>
+            </div>
+
+            <!-- GPUs Section -->
+            <div id="gpus" class="section">
+                <h2 class="mb-lg">GPU Management</h2>
+
+                <div class="stats-grid mb-lg">
+                    <div class="stat-card">
+                        <div class="stat-label">NVIDIA GPUs</div>
+                        <div class="stat-value" id="nvidiaCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">AMD GPUs</div>
+                        <div class="stat-value" id="amdCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label" data-i18n="availableGPUs">Available GPUs</div>
+                        <div class="stat-value" id="availableCount">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label" data-i18n="allocatedGPUs">Allocated GPUs</div>
+                        <div class="stat-value" id="allocatedCount">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">All GPUs</h3>
+                    </div>
+                    <div class="gpu-grid" id="gpuGrid"></div>
+                </div>
+            </div>
+
+            <!-- Nexus Fabric Section -->
+            <div id="fabric" class="section">
+                <h2 class="mb-lg">Cisco Nexus Fabric Discovery</h2>
+                <div class="card">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Switch ID</th>
+                                    <th>Model</th>
+                                    <th>Ports</th>
+                                    <th>Connected Servers</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fabricTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card mt-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">UCS Servers</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Server ID</th>
+                                    <th>Model</th>
+                                    <th>Rack</th>
+                                    <th>Nexus Switch</th>
+                                    <th>GPUs</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ucsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Section -->
+            <div id="logs" class="section">
+                <h2 class="mb-lg">System Logs</h2>
+                <div class="card">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Tenant</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>User</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="section">
+                <h2 class="mb-lg">Analytics & Reports</h2>
+                <div class="grid grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Tenant Consumption</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="tenantConsumptionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">GPU Utilization by Type</h3>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="gpuTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Tenant Modal -->
+    <div id="createTenantModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="createTenant">Create Tenant</h3>
+                <button class="close-modal" onclick="closeModal('createTenantModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label class="form-label" data-i18n="tenantName">Tenant Name</label>
+                <input type="text" class="form-input" id="newTenantName">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Monthly Budget ($)</label>
+                <input type="number" class="form-input" id="newTenantBudget">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Allocate GPUs</label>
+                <select class="form-select" id="newTenantGPUs" multiple style="height: 150px;">
+                    <!-- Will be populated dynamically -->
+                </select>
+            </div>
+            <div class="flex gap-md">
+                <button class="btn btn-primary" onclick="createTenant()">Create</button>
+                <button class="btn btn-secondary" onclick="closeModal('createTenantModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/mock-data.js"></script>
+    <script src="js/csp-admin.js"></script>
+</body>
+</html>
