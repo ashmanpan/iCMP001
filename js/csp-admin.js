@@ -413,6 +413,8 @@ function loadFabric() {
             <td style="font-size: 0.85rem;">${server.nexusSwitch}</td>
             <td><strong style="color: var(--cisco-blue);">${server.gpuCount}x</strong></td>
             <td style="color: var(--text-secondary);">${server.gpuModel}</td>
+            <td style="font-size: 0.8rem;">${server.cpu}</td>
+            <td style="font-size: 0.8rem;">${server.memory}</td>
             <td><span class="badge badge-${server.status === 'online' ? 'success' : 'warning'}">${server.status}</span></td>
         </tr>
     `).join('');
@@ -420,12 +422,50 @@ function loadFabric() {
     // Initialize topology view (but don't render until tab is clicked)
 }
 
+// Switch Infrastructure Tabs (Network/Compute/Storage)
+function switchInfraTab(tab) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('.infra-tab');
+    tabs.forEach(t => {
+        t.classList.remove('active');
+        t.style.color = 'var(--text-secondary)';
+        t.style.borderBottom = '3px solid transparent';
+    });
+    event.target.classList.add('active');
+    event.target.style.color = 'var(--cisco-blue)';
+    event.target.style.borderBottom = '3px solid var(--cisco-blue)';
+
+    // Show/hide views
+    const networkView = document.getElementById('networkView');
+    const computeView = document.getElementById('computeView');
+    const storageView = document.getElementById('storageView');
+
+    networkView.style.display = 'none';
+    computeView.style.display = 'none';
+    storageView.style.display = 'none';
+
+    if (tab === 'network') {
+        networkView.style.display = 'block';
+    } else if (tab === 'compute') {
+        computeView.style.display = 'block';
+    } else if (tab === 'storage') {
+        storageView.style.display = 'block';
+        loadStorageView();
+    }
+}
+
 // Switch Fabric Tab
 function switchFabricTab(tab) {
     // Update tab buttons
     const tabs = document.querySelectorAll('.fabric-tab');
-    tabs.forEach(t => t.classList.remove('active'));
+    tabs.forEach(t => {
+        t.classList.remove('active');
+        t.style.color = 'var(--text-secondary)';
+        t.style.borderBottom = '2px solid transparent';
+    });
     event.target.classList.add('active');
+    event.target.style.color = 'var(--cisco-blue)';
+    event.target.style.borderBottom = '2px solid var(--cisco-blue)';
 
     // Show/hide views
     const tableView = document.getElementById('fabricTableView');
@@ -444,18 +484,19 @@ function switchFabricTab(tab) {
 // Render Topology View with Spine-Leaf Architecture
 function renderTopologyView() {
     const container = document.getElementById('topologyContainer');
-    const width = container.offsetWidth || 1000;
-    const height = 600;
+    const width = container.offsetWidth || 1400;
+    const height = 700;
 
     // Separate switches by type
     const spineSwitches = mockNexusFabric.filter(sw => sw.type === 'Spine');
     const leafSwitches = mockNexusFabric.filter(sw => sw.type === 'Leaf');
 
     // Calculate positions
-    const spineY = 100;
-    const leafY = 450;
-    const spineSpacing = width / (spineSwitches.length + 1);
-    const leafSpacing = width / (leafSwitches.length + 1);
+    const spineY = 80;
+    const leafY = 520;
+    const padding = 50;
+    const spineSpacing = (width - 2 * padding) / (spineSwitches.length + 1);
+    const leafSpacing = (width - 2 * padding) / (leafSwitches.length + 1);
 
     // Create SVG
     let svg = `
@@ -509,44 +550,78 @@ function renderTopologyView() {
         `;
     });
 
-    // Draw Spine Switches
-    svg += `<text x="${width / 2}" y="30" fill="var(--cisco-blue)" font-size="18" font-weight="600" text-anchor="middle">Spine Layer (Core) - 800G</text>`;
+    // Draw Spine Switches (Larger, Core switches)
+    svg += `<text x="${width / 2}" y="30" fill="var(--cisco-blue)" font-size="20" font-weight="700" text-anchor="middle">
+                <tspan>🔷</tspan> Spine Layer (Core) - 800G
+            </text>`;
     spineSwitches.forEach((sw, idx) => {
-        const x = spineSpacing * (idx + 1);
+        const x = padding + spineSpacing * (idx + 1);
         const y = spineY;
-        const statusColor = sw.status === 'healthy' ? 'var(--accent-green)' :
-                           sw.status === 'warning' ? 'var(--accent-yellow)' : 'var(--accent-red)';
+        const statusColor = sw.status === 'healthy' ? '#00ff88' :
+                           sw.status === 'warning' ? '#ffc107' : '#ff4444';
 
         svg += `
             <g class="topology-switch" onclick="showSwitchInfo('${sw.id}')">
-                <rect x="${x - 80}" y="${y}" width="160" height="110"
-                      fill="var(--bg-card)" stroke="${statusColor}" stroke-width="3" rx="8" />
-                <text x="${x}" y="${y + 25}" fill="var(--text-primary)" font-size="13" font-weight="600" text-anchor="middle">${sw.id}</text>
-                <text x="${x}" y="${y + 45}" fill="var(--text-secondary)" font-size="10" text-anchor="middle">${sw.model}</text>
-                <text x="${x}" y="${y + 65}" fill="var(--cisco-blue)" font-size="11" font-weight="600" text-anchor="middle">${sw.speed}</text>
-                <text x="${x}" y="${y + 82}" fill="var(--text-muted)" font-size="9" text-anchor="middle">${sw.ports} Ports</text>
-                <circle cx="${x}" cy="${y + 98}" r="6" fill="${statusColor}" />
+                <!-- Cisco Nexus Switch Icon -->
+                <rect x="${x - 100}" y="${y}" width="200" height="120"
+                      fill="#1a1f28" stroke="${statusColor}" stroke-width="4" rx="10" />
+
+                <!-- Front panel design -->
+                <rect x="${x - 90}" y="${y + 15}" width="180" height="90"
+                      fill="#0a0a0a" stroke="#049FD9" stroke-width="1" rx="4" />
+
+                <!-- LED indicators -->
+                <circle cx="${x - 75}" cy="${y + 25}" r="3" fill="${statusColor}" />
+                <circle cx="${x - 65}" cy="${y + 25}" r="3" fill="${statusColor}" />
+                <circle cx="${x - 55}" cy="${y + 25}" r="3" fill="#049FD9" />
+
+                <!-- Port indicators -->
+                ${Array.from({length: 8}, (_, i) => `
+                    <rect x="${x - 70 + i * 20}" y="${y + 45}" width="15" height="8"
+                          fill="#2a2a2a" stroke="#049FD9" stroke-width="0.5" rx="1" />
+                `).join('')}
+
+                <!-- Labels -->
+                <text x="${x}" y="${y + 75}" fill="var(--cisco-blue)" font-size="12" font-weight="700" text-anchor="middle">${sw.id}</text>
+                <text x="${x}" y="${y + 92}" fill="var(--text-secondary)" font-size="9" text-anchor="middle">${sw.model}</text>
+                <text x="${x - 75}" y="${y + 12}" fill="var(--cisco-blue)" font-size="8" font-weight="600">CISCO</text>
             </g>
         `;
     });
 
-    // Draw Leaf Switches
-    svg += `<text x="${width / 2}" y="380" fill="var(--accent-green)" font-size="18" font-weight="600" text-anchor="middle">Leaf Layer (Access) - 400G</text>`;
+    // Draw Leaf Switches (Smaller, Access switches)
+    svg += `<text x="${width / 2}" y="460" fill="var(--accent-green)" font-size="20" font-weight="700" text-anchor="middle">
+                <tspan>🔶</tspan> Leaf Layer (Access) - 400G
+            </text>`;
     leafSwitches.forEach((sw, idx) => {
-        const x = leafSpacing * (idx + 1);
+        const x = padding + leafSpacing * (idx + 1);
         const y = leafY;
-        const statusColor = sw.status === 'healthy' ? 'var(--accent-green)' :
-                           sw.status === 'warning' ? 'var(--accent-yellow)' : 'var(--accent-red)';
+        const statusColor = sw.status === 'healthy' ? '#00ff88' :
+                           sw.status === 'warning' ? '#ffc107' : '#ff4444';
 
         svg += `
             <g class="topology-switch" onclick="showSwitchInfo('${sw.id}')">
-                <rect x="${x - 80}" y="${y}" width="160" height="110"
-                      fill="var(--bg-card)" stroke="${statusColor}" stroke-width="3" rx="8" />
-                <text x="${x}" y="${y + 25}" fill="var(--text-primary)" font-size="13" font-weight="600" text-anchor="middle">${sw.id}</text>
-                <text x="${x}" y="${y + 45}" fill="var(--text-secondary)" font-size="10" text-anchor="middle">${sw.model}</text>
-                <text x="${x}" y="${y + 65}" fill="var(--cisco-blue)" font-size="11" font-weight="600" text-anchor="middle">${sw.speed}</text>
-                <text x="${x}" y="${y + 82}" fill="var(--text-muted)" font-size="9" text-anchor="middle">${sw.ports} Ports</text>
-                <circle cx="${x}" cy="${y + 98}" r="6" fill="${statusColor}" />
+                <!-- Cisco Nexus Switch Icon (Compact) -->
+                <rect x="${x - 40}" y="${y}" width="80" height="90"
+                      fill="#1a1f28" stroke="${statusColor}" stroke-width="3" rx="6" />
+
+                <!-- Front panel -->
+                <rect x="${x - 35}" y="${y + 10}" width="70" height="65"
+                      fill="#0a0a0a" stroke="#049FD9" stroke-width="0.5" rx="3" />
+
+                <!-- LED -->
+                <circle cx="${x}" cy="${y + 18}" r="2" fill="${statusColor}" />
+
+                <!-- Port indicators -->
+                ${Array.from({length: 4}, (_, i) => `
+                    <rect x="${x - 22 + i * 12}" y="${y + 30}" width="10" height="6"
+                          fill="#2a2a2a" stroke="#049FD9" stroke-width="0.5" rx="1" />
+                `).join('')}
+
+                <!-- Labels -->
+                <text x="${x}" y="${y + 55}" fill="var(--cisco-blue)" font-size="9" font-weight="600" text-anchor="middle">${sw.id}</text>
+                <text x="${x}" y="${y + 68}" fill="var(--text-muted)" font-size="7" text-anchor="middle">${sw.speed}</text>
+                <text x="${x - 28}" y="${y + 8}" fill="var(--cisco-blue)" font-size="6" font-weight="600">CISCO</text>
             </g>
         `;
     });
@@ -571,6 +646,51 @@ function showSwitchInfo(switchId) {
         const direction = l.from === switchId ? '→' : '←';
         return `${direction} ${otherSwitch}: ${l.utilization}%`;
     }).join('\n')}`);
+}
+
+// Load Storage View
+function loadStorageView() {
+    // Calculate totals
+    const totalCapacity = mockStorageArrays.reduce((sum, arr) => sum + arr.capacityTB, 0);
+    const totalUsed = mockStorageArrays.reduce((sum, arr) => sum + arr.usedTB, 0);
+    const totalAvailable = mockStorageArrays.reduce((sum, arr) => sum + arr.availableTB, 0);
+    const totalIOPS = mockStorageArrays.reduce((sum, arr) => sum + arr.iops, 0);
+    const utilizationPercent = ((totalUsed / totalCapacity) * 100).toFixed(1);
+
+    // Update summary stats
+    document.getElementById('totalStorageCapacity').textContent = `${totalCapacity.toLocaleString()} TB`;
+    document.getElementById('storageUtilization').textContent = `${utilizationPercent}% Used`;
+    document.getElementById('availableStorage').textContent = `${totalAvailable.toLocaleString()} TB`;
+    document.getElementById('storageIOPS').textContent = `${(totalIOPS / 1000000).toFixed(1)}M`;
+
+    // Populate storage table
+    const storageTable = document.getElementById('storageTable');
+    storageTable.innerHTML = mockStorageArrays.map(array => {
+        const usedPercent = ((array.usedTB / array.capacityTB) * 100).toFixed(1);
+        const statusBadge = array.status === 'healthy' ? 'success' : 'warning';
+
+        return `
+            <tr>
+                <td><strong>${array.id}</strong></td>
+                <td style="font-size: 0.9rem;">${array.model}</td>
+                <td>
+                    <span class="badge badge-info" style="font-size: 0.7rem;">${array.type}</span>
+                </td>
+                <td><strong>${array.capacityTB} TB</strong></td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="flex: 1; background: var(--bg-tertiary); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${usedPercent}%; height: 100%; background: ${usedPercent > 85 ? 'var(--accent-red)' : usedPercent > 70 ? 'var(--accent-yellow)' : 'var(--cisco-blue)'}; transition: width 0.3s;"></div>
+                        </div>
+                        <span style="font-size: 0.85rem; min-width: 60px;">${array.usedTB} TB (${usedPercent}%)</span>
+                    </div>
+                </td>
+                <td style="color: var(--accent-green);">${array.availableTB} TB</td>
+                <td style="font-size: 0.85rem;">${array.throughputGBps} GB/s</td>
+                <td><span class="badge badge-${statusBadge}">${array.status}</span></td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // Load Logs

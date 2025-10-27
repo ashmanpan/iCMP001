@@ -206,6 +206,16 @@
             color: var(--text-muted);
         }
 
+        /* Infrastructure Tabs */
+        .infra-tab.active {
+            color: var(--cisco-blue) !important;
+            border-bottom-color: var(--cisco-blue) !important;
+        }
+
+        .infra-tab:hover {
+            color: var(--text-primary) !important;
+        }
+
         /* Fabric Tabs */
         .fabric-tab.active {
             color: var(--cisco-blue) !important;
@@ -277,8 +287,8 @@
                     <span data-i18n="gpus">GPUs</span>
                 </li>
                 <li class="menu-item" onclick="showSection('fabric')">
-                    <i class="fas fa-network-wired"></i>
-                    <span data-i18n="nexusFabric">Nexus Fabric</span>
+                    <i class="fas fa-layer-group"></i>
+                    <span data-i18n="infrastructure">Infrastructure</span>
                 </li>
                 <li class="menu-item" onclick="showSection('logs')">
                     <i class="fas fa-file-alt"></i>
@@ -492,19 +502,36 @@
                 </div>
             </div>
 
-            <!-- Nexus Fabric Section -->
+            <!-- Infrastructure Section -->
             <div id="fabric" class="section">
-                <h2 class="mb-lg">Cisco Nexus Fabric Discovery</h2>
+                <h2 class="mb-lg">Infrastructure Management</h2>
 
-                <!-- Tab Navigation -->
-                <div class="fabric-tabs" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-primary);">
-                    <button class="fabric-tab active" onclick="switchFabricTab('table')" style="background: none; border: none; padding: 1rem 2rem; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
-                        <i class="fas fa-table"></i> Table View
+                <!-- Main Infrastructure Tabs -->
+                <div class="infra-tabs" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-primary);">
+                    <button class="infra-tab active" onclick="switchInfraTab('network')" style="background: none; border: none; padding: 1rem 2rem; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-weight: 600;">
+                        <i class="fas fa-network-wired"></i> Network
                     </button>
-                    <button class="fabric-tab" onclick="switchFabricTab('topology')" style="background: none; border: none; padding: 1rem 2rem; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
-                        <i class="fas fa-project-diagram"></i> Topology View
+                    <button class="infra-tab" onclick="switchInfraTab('compute')" style="background: none; border: none; padding: 1rem 2rem; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-weight: 600;">
+                        <i class="fas fa-server"></i> Compute
+                    </button>
+                    <button class="infra-tab" onclick="switchInfraTab('storage')" style="background: none; border: none; padding: 1rem 2rem; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-weight: 600;">
+                        <i class="fas fa-database"></i> Storage
                     </button>
                 </div>
+
+                <!-- Network View -->
+                <div id="networkView" class="infra-view">
+                    <h3 class="mb-lg" style="color: var(--cisco-blue); font-size: 1.25rem;">Cisco Nexus Fabric</h3>
+
+                    <!-- Network Sub-tabs -->
+                    <div class="fabric-tabs" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-primary);">
+                        <button class="fabric-tab active" onclick="switchFabricTab('table')" style="background: none; border: none; padding: 0.75rem 1.5rem; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">
+                            <i class="fas fa-table"></i> Table View
+                        </button>
+                        <button class="fabric-tab" onclick="switchFabricTab('topology')" style="background: none; border: none; padding: 0.75rem 1.5rem; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s;">
+                            <i class="fas fa-project-diagram"></i> Topology View
+                        </button>
+                    </div>
 
                 <!-- Table View -->
                 <div id="fabricTableView" class="fabric-view">
@@ -553,26 +580,108 @@
                         <div id="topologyContainer" style="padding: 2rem; min-height: 600px; background: var(--bg-secondary); border-radius: 8px;"></div>
                     </div>
                 </div>
+                </div>
 
-                <div class="card mt-lg">
-                    <div class="card-header">
-                        <h3 class="card-title">UCS Servers</h3>
+                <!-- Compute View -->
+                <div id="computeView" class="infra-view" style="display: none;">
+                    <h3 class="mb-lg" style="color: var(--cisco-blue); font-size: 1.25rem;">UCS Compute Infrastructure</h3>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-server"></i> UCS GPU Servers
+                            </h3>
+                            <div style="display: flex; gap: 1rem;">
+                                <button class="btn btn-sm btn-secondary">
+                                    <i class="fas fa-sync-alt"></i> Discover Servers
+                                </button>
+                                <button class="btn btn-sm btn-secondary">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Server ID</th>
+                                        <th>Model</th>
+                                        <th>Rack</th>
+                                        <th>Nexus Switch</th>
+                                        <th>GPUs</th>
+                                        <th>GPU Model</th>
+                                        <th>CPU</th>
+                                        <th>Memory</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ucsTable"></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Server ID</th>
-                                    <th>Model</th>
-                                    <th>Rack</th>
-                                    <th>Nexus Switch</th>
-                                    <th>GPUs</th>
-                                    <th>GPU Model</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ucsTable"></tbody>
-                        </table>
+                </div>
+
+                <!-- Storage View -->
+                <div id="storageView" class="infra-view" style="display: none;">
+                    <h3 class="mb-lg" style="color: var(--cisco-blue); font-size: 1.25rem;">Storage Infrastructure</h3>
+
+                    <div class="grid grid-3 mb-lg">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">
+                                <i class="fas fa-hdd"></i>
+                            </div>
+                            <div class="stat-label">Total Capacity</div>
+                            <div class="stat-value" id="totalStorageCapacity">--</div>
+                            <div class="stat-change positive" id="storageUtilization">-- Used</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-label">Available</div>
+                            <div class="stat-value" id="availableStorage">--</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon yellow">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div class="stat-label">IOPS</div>
+                            <div class="stat-value" id="storageIOPS">--</div>
+                            <div class="stat-change" id="iopsChange">--</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-database"></i> Storage Arrays
+                            </h3>
+                            <div style="display: flex; gap: 1rem;">
+                                <button class="btn btn-sm btn-secondary">
+                                    <i class="fas fa-sync-alt"></i> Discover Arrays
+                                </button>
+                                <button class="btn btn-sm btn-primary">
+                                    <i class="fas fa-plus"></i> Add Volume
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Array ID</th>
+                                        <th>Model</th>
+                                        <th>Type</th>
+                                        <th>Capacity</th>
+                                        <th>Used</th>
+                                        <th>Available</th>
+                                        <th>Throughput</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="storageTable"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>

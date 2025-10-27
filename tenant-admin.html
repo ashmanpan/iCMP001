@@ -130,13 +130,45 @@
 
             <!-- Services Section -->
             <div id="services" class="section">
-                <h2 class="mb-lg">Service Management</h2>
+                <h2 class="mb-lg">Service Catalog</h2>
+
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-rocket"></i> Available Services
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Deploy AI/ML services with custom configurations</p>
+                    </div>
+                    <div class="grid grid-3 gap-lg" id="servicesGrid" style="padding: 1.5rem;"></div>
+                </div>
 
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Available Services</h3>
+                        <h3 class="card-title">
+                            <i class="fas fa-server"></i> My Deployed Services
+                        </h3>
                     </div>
-                    <div class="grid grid-3 gap-lg" id="servicesGrid" style="padding: 1rem;"></div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Service Name</th>
+                                    <th>Type</th>
+                                    <th>Configuration</th>
+                                    <th>Status</th>
+                                    <th>Deployed</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deployedServicesTable">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                        No services deployed yet. Click "Deploy" on any service above to get started.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -236,6 +268,789 @@
         </div>
     </div>
 
+    <!-- LLM as a Service Deployment Modal -->
+    <div id="deployLLMModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-brain"></i> Deploy LLM as a Service
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployLLMModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Service Name *</label>
+                        <input type="text" class="form-input" id="llmServiceName" placeholder="e.g., My ChatBot API">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Select LLM Model *</label>
+                        <select class="form-select" id="llmModel">
+                            <option value="">Choose a model...</option>
+                            <option value="gpt-4-turbo">GPT-4 Turbo (Latest, Best quality)</option>
+                            <option value="gpt-4">GPT-4 (Balanced)</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast, Cost-effective)</option>
+                            <option value="claude-3.5-sonnet">Claude 3.5 Sonnet (Best reasoning)</option>
+                            <option value="claude-3-opus">Claude 3 Opus (Best overall)</option>
+                            <option value="claude-3-haiku">Claude 3 Haiku (Fastest)</option>
+                            <option value="gemini-pro">Gemini Pro (Google)</option>
+                            <option value="mistral-large">Mistral Large (Open source)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">GPU Allocation *</label>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <input type="range" id="llmGPUSlider" min="1" max="8" value="2"
+                                   oninput="document.getElementById('llmGPUCount').textContent = this.value"
+                                   style="flex: 1;">
+                            <strong id="llmGPUCount" style="min-width: 60px; color: var(--cisco-blue);">2 GPUs</strong>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                            More GPUs = Higher throughput & lower latency
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Max Tokens per Request</label>
+                        <input type="number" class="form-input" id="llmMaxTokens" value="4096" min="256" max="128000">
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Deployment Duration *</label>
+                        <select class="form-select" id="llmDuration">
+                            <option value="hourly">Hourly ($25/hour)</option>
+                            <option value="daily">Daily ($480/day)</option>
+                            <option value="weekly">Weekly ($2,800/week)</option>
+                            <option value="monthly" selected>Monthly ($10,000/month)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="llmAutoScaling" checked>
+                            <span class="form-label" style="margin: 0;">Enable Auto-Scaling</span>
+                        </label>
+                        <p style="font-size: 0.75rem; color: var(--text-muted);">
+                            Automatically scale GPUs based on request volume (1-8 GPUs)
+                        </p>
+                    </div>
+
+                    <div class="form-group" id="llmScalingConfig" style="padding-left: 1.5rem;">
+                        <label class="form-label">Min GPUs</label>
+                        <input type="number" class="form-input" id="llmMinGPUs" value="1" min="1" max="8">
+
+                        <label class="form-label" style="margin-top: 0.5rem;">Max GPUs</label>
+                        <input type="number" class="form-input" id="llmMaxGPUs" value="8" min="1" max="8">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rate Limit (requests/min)</label>
+                        <input type="number" class="form-input" id="llmRateLimit" value="100" min="10" max="10000">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">API Endpoint Configuration</label>
+                <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.85rem;">
+                    <div>Base URL: <span style="color: var(--cisco-blue);">https://api.cisco-cmp.cloud/llm/<span id="llmEndpointPreview">your-service-name</span></span></div>
+                    <div style="margin-top: 0.5rem;">Authentication: Bearer Token (auto-generated)</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(4, 159, 217, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cisco-blue);">
+                <strong>Estimated Cost:</strong> <span id="llmEstimatedCost" style="color: var(--cisco-blue); font-size: 1.25rem;">$10,000</span>/month
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployLLMService()">
+                    <i class="fas fa-rocket"></i> Deploy Service
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployLLMModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fine-tuning Service Modal -->
+    <div id="deployFineTuningModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-sliders-h"></i> Deploy Fine-Tuning Service
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployFineTuningModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Job Name *</label>
+                        <input type="text" class="form-input" id="ftJobName" placeholder="e.g., Customer Support Model">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Base Model *</label>
+                        <select class="form-select" id="ftBaseModel">
+                            <option value="">Select base model...</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="llama-2-70b">Llama 2 70B</option>
+                            <option value="llama-3-8b">Llama 3 8B</option>
+                            <option value="mistral-7b">Mistral 7B</option>
+                            <option value="falcon-40b">Falcon 40B</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Training Data Source *</label>
+                        <select class="form-select" id="ftDataSource" onchange="toggleDataSourceFields()">
+                            <option value="">Choose data source...</option>
+                            <option value="upload">Upload Files (JSON/JSONL/CSV)</option>
+                            <option value="s3">Amazon S3 Bucket</option>
+                            <option value="gcs">Google Cloud Storage</option>
+                            <option value="azure">Azure Blob Storage</option>
+                            <option value="minio">MinIO Object Storage</option>
+                            <option value="onedrive">Microsoft OneDrive</option>
+                        </select>
+                    </div>
+
+                    <!-- File Upload Fields -->
+                    <div id="ftUploadFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Upload Training Data</label>
+                            <div style="border: 2px dashed var(--border-cisco); padding: 2rem; border-radius: 8px; text-align: center; cursor: pointer; background: var(--bg-tertiary);" onclick="document.getElementById('ftFileInput').click();">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--cisco-blue); margin-bottom: 0.5rem;"></i>
+                                <div>Click to upload or drag & drop</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                    Supported: .json, .jsonl, .csv (Max 500MB)
+                                </div>
+                            </div>
+                            <input type="file" id="ftFileInput" accept=".json,.jsonl,.csv" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Cloud Storage Fields -->
+                    <div id="ftCloudFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Bucket/Container Name *</label>
+                            <input type="text" class="form-input" id="ftBucketName" placeholder="my-training-data">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Object Path *</label>
+                            <input type="text" class="form-input" id="ftObjectPath" placeholder="/datasets/training.jsonl">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Access Key/Client ID</label>
+                            <input type="text" class="form-input" id="ftAccessKey">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Secret Key</label>
+                            <input type="password" class="form-input" id="ftSecretKey">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">GPU Configuration *</label>
+                        <select class="form-select" id="ftGPUConfig">
+                            <option value="1xH100">1x H100 (80GB) - Small datasets</option>
+                            <option value="2xH100">2x H100 (80GB) - Medium datasets</option>
+                            <option value="4xH100" selected>4x H100 (80GB) - Large datasets</option>
+                            <option value="8xH100">8x H100 (80GB) - Very large datasets</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Training Epochs</label>
+                        <input type="number" class="form-input" id="ftEpochs" value="3" min="1" max="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Learning Rate</label>
+                        <input type="text" class="form-input" id="ftLearningRate" value="2e-5" placeholder="e.g., 2e-5">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Batch Size</label>
+                        <input type="number" class="form-input" id="ftBatchSize" value="8" min="1" max="128">
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" id="ftValidationSplit" checked>
+                            <span class="form-label" style="margin: 0;">Use Validation Split (20%)</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Output Model Storage</label>
+                        <select class="form-select" id="ftOutputStorage">
+                            <option value="internal">Internal Storage (Included)</option>
+                            <option value="s3">Save to S3</option>
+                            <option value="gcs">Save to GCS</option>
+                            <option value="custom">Custom Endpoint</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255, 193, 7, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent-yellow); margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <strong>Estimated Training Time:</strong> <span id="ftEstimatedTime">4-6 hours</span>
+                    </div>
+                    <div>
+                        <strong>Estimated Cost:</strong> <span id="ftEstimatedCost" style="color: var(--accent-yellow); font-size: 1.1rem;">$320</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployFineTuningService()">
+                    <i class="fas fa-play"></i> Start Training
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployFineTuningModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Computer Vision Service Modal -->
+    <div id="deployComputerVisionModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-eye"></i> Deploy Computer Vision Service
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployComputerVisionModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Service Name *</label>
+                        <input type="text" class="form-input" id="cvServiceName" placeholder="e.g., Security Camera Analysis">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">CV Model Type *</label>
+                        <select class="form-select" id="cvModelType">
+                            <option value="">Select model type...</option>
+                            <option value="object-detection">Object Detection (YOLO, Faster R-CNN)</option>
+                            <option value="image-classification">Image Classification (ResNet, EfficientNet)</option>
+                            <option value="semantic-segmentation">Semantic Segmentation (U-Net, DeepLab)</option>
+                            <option value="pose-estimation">Pose Estimation (OpenPose, MediaPipe)</option>
+                            <option value="face-recognition">Face Recognition (FaceNet, ArcFace)</option>
+                            <option value="ocr">OCR Text Recognition (Tesseract, PaddleOCR)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Input Source Type *</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; cursor: pointer; border: 2px solid transparent;">
+                                <input type="radio" name="cvInputType" value="live-stream" id="cvLiveStream" checked>
+                                <div>
+                                    <div style="font-weight: 600;"><i class="fas fa-video"></i> Live Stream</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">RTSP, WebRTC, HLS</div>
+                                </div>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; cursor: pointer; border: 2px solid transparent;">
+                                <input type="radio" name="cvInputType" value="video-upload" id="cvVideoUpload">
+                                <div>
+                                    <div style="font-weight: 600;"><i class="fas fa-file-video"></i> Video Upload</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-muted);">MP4, AVI, MOV</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Live Stream Config -->
+                    <div id="cvLiveStreamConfig">
+                        <div class="form-group">
+                            <label class="form-label">Stream URL</label>
+                            <input type="text" class="form-input" id="cvStreamURL" placeholder="rtsp://camera-ip:554/stream">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Frame Rate (FPS)</label>
+                            <select class="form-select" id="cvFrameRate">
+                                <option value="5">5 FPS (Low latency)</option>
+                                <option value="15">15 FPS (Balanced)</option>
+                                <option value="30" selected>30 FPS (High quality)</option>
+                                <option value="60">60 FPS (Ultra quality)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">GPU Allocation *</label>
+                        <select class="form-select" id="cvGPUConfig">
+                            <option value="1xT4">1x T4 (16GB) - Basic inference</option>
+                            <option value="1xL4">1x L4 (24GB) - Standard inference</option>
+                            <option value="2xL4" selected>2x L4 (24GB) - High throughput</option>
+                            <option value="1xL40S">1x L40S (48GB) - Premium inference</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Processing Options</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="cvBatchProcessing" checked>
+                                <span>Enable Batch Processing</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="cvRealTimeAlerts">
+                                <span>Real-time Alerts (Webhook)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="cvSaveOutput" checked>
+                                <span>Save Processed Output</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confidence Threshold</label>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <input type="range" id="cvConfidenceSlider" min="0" max="100" value="75"
+                                   oninput="document.getElementById('cvConfidenceValue').textContent = this.value + '%'"
+                                   style="flex: 1;">
+                            <strong id="cvConfidenceValue" style="min-width: 50px;">75%</strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Output Format</label>
+                        <select class="form-select" id="cvOutputFormat">
+                            <option value="json">JSON (Bounding boxes, labels)</option>
+                            <option value="annotated-video">Annotated Video</option>
+                            <option value="both" selected>Both JSON + Annotated Video</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Deployment Duration</label>
+                        <select class="form-select" id="cvDuration">
+                            <option value="hourly">Hourly ($15/hour)</option>
+                            <option value="daily">Daily ($288/day)</option>
+                            <option value="weekly">Weekly ($1,680/week)</option>
+                            <option value="monthly" selected>Monthly ($6,000/month)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(4, 159, 217, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cisco-blue); margin-top: 1rem;">
+                <strong>Estimated Cost:</strong> <span id="cvEstimatedCost" style="color: var(--cisco-blue); font-size: 1.25rem;">$6,000</span>/month
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployComputerVisionService()">
+                    <i class="fas fa-rocket"></i> Deploy Service
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployComputerVisionModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Virtual Machine Service Modal -->
+    <div id="deployVMModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-desktop"></i> Deploy Virtual Machine
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployVMModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">VM Name *</label>
+                        <input type="text" class="form-input" id="vmName" placeholder="e.g., ml-training-vm-01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Operating System *</label>
+                        <select class="form-select" id="vmOS">
+                            <option value="">Select OS...</option>
+                            <option value="ubuntu-22.04">Ubuntu 22.04 LTS (Recommended for ML)</option>
+                            <option value="ubuntu-20.04">Ubuntu 20.04 LTS</option>
+                            <option value="rhel-9">Red Hat Enterprise Linux 9</option>
+                            <option value="centos-stream-9">CentOS Stream 9</option>
+                            <option value="rocky-linux-9">Rocky Linux 9</option>
+                            <option value="windows-server-2022">Windows Server 2022</option>
+                            <option value="windows-server-2019">Windows Server 2019</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">VM Size *</label>
+                        <select class="form-select" id="vmSize">
+                            <option value="">Choose size...</option>
+                            <option value="small">Small - 4 vCPU, 16GB RAM</option>
+                            <option value="medium">Medium - 8 vCPU, 32GB RAM</option>
+                            <option value="large" selected>Large - 16 vCPU, 64GB RAM</option>
+                            <option value="xlarge">X-Large - 32 vCPU, 128GB RAM</option>
+                            <option value="custom">Custom Configuration</option>
+                        </select>
+                    </div>
+
+                    <div id="vmCustomConfig" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">vCPUs</label>
+                            <input type="number" class="form-input" id="vmCPUs" value="16" min="1" max="128">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">RAM (GB)</label>
+                            <input type="number" class="form-input" id="vmRAM" value="64" min="4" max="1024">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">GPU Attachment</label>
+                        <select class="form-select" id="vmGPU">
+                            <option value="none">No GPU (CPU only)</option>
+                            <option value="1xH100" selected>1x H100 (80GB)</option>
+                            <option value="2xH100">2x H100 (80GB)</option>
+                            <option value="4xH100">4x H100 (80GB)</option>
+                            <option value="1xA100">1x A100 (80GB)</option>
+                            <option value="2xA100">2x A100 (80GB)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Storage (GB) *</label>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <input type="range" id="vmStorageSlider" min="50" max="2000" value="500" step="50"
+                                   oninput="document.getElementById('vmStorageValue').textContent = this.value"
+                                   style="flex: 1;">
+                            <strong id="vmStorageValue" style="min-width: 80px; color: var(--cisco-blue);">500 GB</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">SSH Access Configuration</label>
+                        <div style="background: rgba(0, 255, 136, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent-green); margin-bottom: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <i class="fas fa-key" style="color: var(--accent-green);"></i>
+                                <strong>Automatic SSH Key Generation</strong>
+                            </div>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
+                                SSH key pair will be auto-generated. Private key will be securely delivered via encrypted email.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">SSH Username</label>
+                        <input type="text" class="form-input" id="vmSSHUser" value="admin" placeholder="admin">
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                            Default: admin (You can change after first login)
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Network Configuration</label>
+                        <select class="form-select" id="vmNetwork">
+                            <option value="private">Private Network (Default)</option>
+                            <option value="public">Public IP (Internet facing)</option>
+                            <option value="hybrid">Hybrid (Private + Public)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Firewall Rules</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="vmAllowSSH" checked>
+                                <span>Allow SSH (Port 22)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="vmAllowHTTP">
+                                <span>Allow HTTP (Port 80)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="vmAllowHTTPS">
+                                <span>Allow HTTPS (Port 443)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="vmAllowRDP">
+                                <span>Allow RDP (Port 3389) - For Windows</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="vmAllowCustom">
+                                <span>Custom Ports</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="vmCustomPorts" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Custom Port Ranges</label>
+                            <input type="text" class="form-input" id="vmCustomPortRange" placeholder="e.g., 8000-8100, 9090">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Auto-Backup</label>
+                        <select class="form-select" id="vmBackup">
+                            <option value="none">No Backup</option>
+                            <option value="daily" selected>Daily Backup (7-day retention)</option>
+                            <option value="weekly">Weekly Backup (4-week retention)</option>
+                            <option value="monthly">Monthly Backup (12-month retention)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">Access Credentials Will Be Provided:</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
+                    <div>
+                        <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> SSH Private Key (Encrypted Email)
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> VM IP Address
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> SSH Connection String
+                    </div>
+                    <div>
+                        <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> Web Console Access
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(4, 159, 217, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cisco-blue); margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <strong>Estimated Monthly Cost:</strong> <span id="vmEstimatedCost" style="color: var(--cisco-blue); font-size: 1.25rem;">$1,250</span>/month
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                        Ready in ~5 minutes
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployVMService()">
+                    <i class="fas fa-rocket"></i> Deploy VM
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployVMModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bare Metal Server Modal -->
+    <div id="deployBareMetalModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-server"></i> Deploy Bare Metal Server
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployBareMetalModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Server Name *</label>
+                        <input type="text" class="form-input" id="bmServerName" placeholder="e.g., gpu-workstation-01">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Server Configuration *</label>
+                        <select class="form-select" id="bmServerConfig" onchange="updateBareMetalPreview()">
+                            <option value="">Select configuration...</option>
+                            <option value="ucs-c225-m8">UCS C225 M8 - 1x AMD EPYC 8534P, 512GB, 2-3 GPUs</option>
+                            <option value="ucs-c845a-m8" selected>UCS C845A M8 - 2x AMD EPYC 9754, 1.5TB, 2-8 GPUs</option>
+                            <option value="ucs-c885a-m8">UCS C885A M8 - 2x AMD EPYC 9754, 2TB, 8 GPUs (Max Performance)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="bmConfigPreview" style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px;">
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--cisco-blue);">UCS C845A M8 Specifications:</div>
+                        <div style="font-size: 0.85rem; display: grid; gap: 0.25rem;">
+                            <div>• CPU: 2x AMD EPYC 9754 (256 cores total)</div>
+                            <div>• Memory: 1.5TB DDR5</div>
+                            <div>• GPU Slots: 2-8 GPUs (PCIe Gen5)</div>
+                            <div>• Network: 2x 100GbE</div>
+                            <div>• Storage: 8x NVMe drive bays</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">GPU Configuration *</label>
+                        <select class="form-select" id="bmGPUConfig">
+                            <option value="">Select GPU configuration...</option>
+                            <option value="2xH200">2x H200 NVL (282GB total)</option>
+                            <option value="4xH200">4x H200 NVL (564GB total)</option>
+                            <option value="8xH100" selected>8x H100 (640GB total)</option>
+                            <option value="8xH200">8x H200 (1,128GB total)</option>
+                            <option value="8xMI300X">8x AMD MI300X (1,536GB total)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Operating System *</label>
+                        <select class="form-select" id="bmOS">
+                            <option value="">Select OS...</option>
+                            <option value="ubuntu-22.04-ml" selected>Ubuntu 22.04 LTS + ML Stack (CUDA, PyTorch, TensorFlow)</option>
+                            <option value="ubuntu-22.04">Ubuntu 22.04 LTS (Minimal)</option>
+                            <option value="rhel-9">Red Hat Enterprise Linux 9</option>
+                            <option value="rocky-linux-9">Rocky Linux 9</option>
+                            <option value="vmware-esxi-8">VMware ESXi 8.0 (Hypervisor)</option>
+                            <option value="proxmox">Proxmox VE (Open source hypervisor)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Access Methods</label>
+                        <div style="background: rgba(0, 255, 136, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--accent-green);">
+                            <div style="font-weight: 600; margin-bottom: 0.75rem;">
+                                <i class="fas fa-shield-alt"></i> Secure Access Provided:
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.85rem;">
+                                <div>
+                                    <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> <strong>IPMI/BMC Access</strong>
+                                    <div style="margin-left: 1.5rem; font-size: 0.75rem; color: var(--text-muted);">Full hardware control, power management, remote console</div>
+                                </div>
+                                <div>
+                                    <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> <strong>SSH Root Access</strong>
+                                    <div style="margin-left: 1.5rem; font-size: 0.75rem; color: var(--text-muted);">Direct OS access with generated key pair</div>
+                                </div>
+                                <div>
+                                    <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> <strong>Serial Console Access</strong>
+                                    <div style="margin-left: 1.5rem; font-size: 0.75rem; color: var(--text-muted);">Emergency recovery console</div>
+                                </div>
+                                <div>
+                                    <i class="fas fa-check-circle" style="color: var(--accent-green);"></i> <strong>Web Management Interface</strong>
+                                    <div style="margin-left: 1.5rem; font-size: 0.75rem; color: var(--text-muted);">UCS Manager access</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Network Configuration</label>
+                        <select class="form-select" id="bmNetwork">
+                            <option value="dual-100g" selected>Dual 100GbE (Redundant)</option>
+                            <option value="single-100g">Single 100GbE</option>
+                            <option value="quad-25g">Quad 25GbE (4x 25G)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">NVMe Storage Configuration</label>
+                        <select class="form-select" id="bmStorage">
+                            <option value="2x4tb">2x 4TB NVMe (RAID 1)</option>
+                            <option value="4x4tb" selected>4x 4TB NVMe (RAID 10)</option>
+                            <option value="8x8tb">8x 8TB NVMe (RAID 6)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Deployment Options</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="bmMonitoring" checked>
+                                <span>24/7 Hardware Monitoring</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="bmManagedSupport" checked>
+                                <span>Managed Support (OS updates, patching)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="bmAutoReplace">
+                                <span>Auto Hardware Replacement (48h SLA)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Provisioning Time</label>
+                        <select class="form-select" id="bmProvisioningTime">
+                            <option value="standard" selected>Standard (4-6 hours) - Included</option>
+                            <option value="express">Express (1-2 hours) - +$500</option>
+                            <option value="immediate">Immediate (<30 min) - +$1,500</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 1.25rem; border-radius: 8px; margin-top: 1rem;">
+                <div style="font-weight: 600; margin-bottom: 0.75rem; font-size: 1.1rem;">
+                    <i class="fas fa-envelope"></i> Access Credentials Delivery
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
+                    <div>• IPMI IP Address & Credentials</div>
+                    <div>• SSH Private Key (Encrypted)</div>
+                    <div>• Server Public IP Address</div>
+                    <div>• UCS Manager URL & Login</div>
+                    <div>• Serial Console Access Details</div>
+                    <div>• Quick Start Guide PDF</div>
+                </div>
+                <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-muted);">
+                    All credentials sent to your registered email within 15 minutes of provisioning completion.
+                </div>
+            </div>
+
+            <div style="background: rgba(4, 159, 217, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cisco-blue); margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>Estimated Monthly Cost:</strong> <span id="bmEstimatedCost" style="color: var(--cisco-blue); font-size: 1.5rem; font-weight: 700;">$18,500</span>/month
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                            Includes: Hardware, GPUs, Network, Power, Cooling, Monitoring
+                        </div>
+                    </div>
+                    <div style="text-align: right; font-size: 0.85rem;">
+                        <div style="color: var(--accent-green); font-weight: 600;">Ready in 4-6 hours</div>
+                        <div style="color: var(--text-muted);">One-time setup: $2,000</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployBareMetalService()">
+                    <i class="fas fa-rocket"></i> Deploy Bare Metal Server
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployBareMetalModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/i18n.js"></script>
     <script src="js/mock-data.js"></script>
     <script src="js/tenant-admin.js"></script>
@@ -245,6 +1060,20 @@
         document.addEventListener('DOMContentLoaded', () => {
             const tenantId = sessionStorage.getItem('tenantId') || 'tenant-001';
             initAIAgent('tenant-admin', tenantId);
+        });
+
+        // Toggle data source fields for fine-tuning
+        function toggleDataSourceFields() {
+            const source = document.getElementById('ftDataSource').value;
+            document.getElementById('ftUploadFields').style.display = source === 'upload' ? 'block' : 'none';
+            document.getElementById('ftCloudFields').style.display =
+                (source === 's3' || source === 'gcs' || source === 'azure' || source === 'minio' || source === 'onedrive') ? 'block' : 'none';
+        }
+
+        // Update LLM endpoint preview
+        document.getElementById('llmServiceName')?.addEventListener('input', (e) => {
+            const name = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '-');
+            document.getElementById('llmEndpointPreview').textContent = name || 'your-service-name';
         });
     </script>
 </body>

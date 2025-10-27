@@ -74,36 +74,172 @@ const mockGPUs = {
 // UCS GPU Servers - AI-Optimized Models
 const mockUCSServers = [
     // UCS C225 M8 - Up to 3 GPUs (1RU, single socket)
-    { id: 'UCS-001', name: 'UCS-C225-M8', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2, gpuModel: 'NVIDIA H100 NVL' },
-    { id: 'UCS-002', name: 'UCS-C225-M8', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 3, gpuModel: 'NVIDIA L40S' },
+    { id: 'UCS-001', name: 'UCS-C225-M8', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2, gpuModel: 'NVIDIA H100 NVL', cpu: 'AMD EPYC 8534P (64C)', memory: '512GB DDR5' },
+    { id: 'UCS-002', name: 'UCS-C225-M8', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 3, gpuModel: 'NVIDIA L40S', cpu: 'AMD EPYC 8534P (64C)', memory: '512GB DDR5' },
 
     // UCS C845A M8 - 2-8 GPUs (AI Inference Optimized)
-    { id: 'UCS-003', name: 'UCS-C845A-M8', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 4, gpuModel: 'NVIDIA H200 NVL' },
-    { id: 'UCS-004', name: 'UCS-C845A-M8', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 8, gpuModel: 'NVIDIA H100 NVL' },
-    { id: 'UCS-005', name: 'UCS-C845A-M8', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2, gpuModel: 'AMD MI210' },
+    { id: 'UCS-003', name: 'UCS-C845A-M8', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 4, gpuModel: 'NVIDIA H200 NVL', cpu: '2x AMD EPYC 9754 (128C)', memory: '1.5TB DDR5' },
+    { id: 'UCS-004', name: 'UCS-C845A-M8', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 8, gpuModel: 'NVIDIA H100 NVL', cpu: '2x AMD EPYC 9754 (128C)', memory: '1.5TB DDR5' },
+    { id: 'UCS-005', name: 'UCS-C845A-M8', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2, gpuModel: 'AMD MI210', cpu: '2x AMD EPYC 9754 (128C)', memory: '1TB DDR5' },
 
     // UCS C885A M8 - 8 GPUs (AI Training Optimized)
-    { id: 'UCS-006', name: 'UCS-C885A-M8', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 8, gpuModel: 'NVIDIA H200' },
-    { id: 'UCS-007', name: 'UCS-C885A-M8', rack: 'Rack-4', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'maintenance', gpuCount: 8, gpuModel: 'AMD MI300X' }
+    { id: 'UCS-006', name: 'UCS-C885A-M8', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 8, gpuModel: 'NVIDIA H200', cpu: '2x AMD EPYC 9754 (128C)', memory: '2TB DDR5' },
+    { id: 'UCS-007', name: 'UCS-C885A-M8', rack: 'Rack-4', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'maintenance', gpuCount: 8, gpuModel: 'AMD MI300X', cpu: '2x AMD EPYC 9754 (128C)', memory: '2TB DDR5' }
+];
+
+// Storage Arrays - Enterprise NVMe Storage for AI/ML Workloads
+const mockStorageArrays = [
+    {
+        id: 'STORAGE-001',
+        model: 'NetApp AFF A900',
+        type: 'All-Flash NVMe',
+        capacityTB: 500,
+        usedTB: 325,
+        availableTB: 175,
+        throughputGBps: 95,
+        iops: 8500000,
+        status: 'healthy',
+        redundancy: 'RAID-DP',
+        protocol: 'NVMe/FC, NFS, iSCSI'
+    },
+    {
+        id: 'STORAGE-002',
+        model: 'NetApp AFF A900',
+        type: 'All-Flash NVMe',
+        capacityTB: 500,
+        usedTB: 410,
+        availableTB: 90,
+        throughputGBps: 92,
+        iops: 8200000,
+        status: 'healthy',
+        redundancy: 'RAID-DP',
+        protocol: 'NVMe/FC, NFS, iSCSI'
+    },
+    {
+        id: 'STORAGE-003',
+        model: 'Pure Storage FlashArray//XL',
+        type: 'All-Flash NVMe',
+        capacityTB: 750,
+        usedTB: 480,
+        availableTB: 270,
+        throughputGBps: 150,
+        iops: 12000000,
+        status: 'healthy',
+        redundancy: 'RAID-3D',
+        protocol: 'NVMe-oF, FC, iSCSI'
+    },
+    {
+        id: 'STORAGE-004',
+        model: 'Dell PowerStore 9000X',
+        type: 'All-Flash NVMe',
+        capacityTB: 600,
+        usedTB: 385,
+        availableTB: 215,
+        throughputGBps: 110,
+        iops: 9500000,
+        status: 'healthy',
+        redundancy: 'RAID 5/6',
+        protocol: 'NVMe-oF, FC, iSCSI'
+    },
+    {
+        id: 'STORAGE-005',
+        model: 'HPE Alletra 9000',
+        type: 'All-Flash NVMe',
+        capacityTB: 400,
+        usedTB: 180,
+        availableTB: 220,
+        throughputGBps: 85,
+        iops: 7200000,
+        status: 'healthy',
+        redundancy: 'RAID 6',
+        protocol: 'NVMe-oF, FC'
+    },
+    {
+        id: 'STORAGE-006',
+        model: 'IBM FlashSystem 9500',
+        type: 'All-Flash NVMe',
+        capacityTB: 550,
+        usedTB: 295,
+        availableTB: 255,
+        throughputGBps: 105,
+        iops: 8800000,
+        status: 'warning',
+        redundancy: 'RAID 5/6',
+        protocol: 'NVMe-oF, FC, iSCSI'
+    }
 ];
 
 // Nexus Fabric - AI-Optimized Spine-Leaf Architecture
 const mockNexusFabric = [
-    // Spine Switches (Core Layer) - 800G/400G for AI Workloads
-    { id: 'Nexus-9364E-SG2-01', model: 'Nexus 9364E-SG2', type: 'Spine', ports: 64, speed: '800G', connectedServers: 2, status: 'healthy' },
-    { id: 'Nexus-9364E-SG2-02', model: 'Nexus 9364E-SG2', type: 'Spine', ports: 64, speed: '800G', connectedServers: 1, status: 'warning' },
+    // Spine Switches (Core Layer) - 800G for AI Workloads
+    { id: 'Spine-01', model: 'Nexus 9364E-SG2', type: 'Spine', ports: 64, speed: '800G', connectedServers: 6, status: 'healthy' },
+    { id: 'Spine-02', model: 'Nexus 9364E-SG2', type: 'Spine', ports: 64, speed: '800G', connectedServers: 6, status: 'healthy' },
 
     // Leaf Switches (Access Layer) - 400G for GPU Connectivity
-    { id: 'Nexus-9332D-GX2B-01', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 2, status: 'healthy' },
-    { id: 'Nexus-9332D-GX2B-02', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 2, status: 'healthy' }
+    { id: 'Leaf-01', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-02', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-03', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-04', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-05', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-06', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-07', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-08', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-09', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-10', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' },
+    { id: 'Leaf-11', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'warning' },
+    { id: 'Leaf-12', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 1, status: 'healthy' }
 ];
 
 // Link Utilization between Spine and Leaf Switches (in %)
+// Each Leaf connects to both Spines for redundancy
 const mockFabricLinks = [
-    { from: 'Nexus-9332D-GX2B-01', to: 'Nexus-9364E-SG2-01', utilization: 45, status: 'healthy' },
-    { from: 'Nexus-9332D-GX2B-01', to: 'Nexus-9364E-SG2-02', utilization: 72, status: 'warning' },
-    { from: 'Nexus-9332D-GX2B-02', to: 'Nexus-9364E-SG2-01', utilization: 38, status: 'healthy' },
-    { from: 'Nexus-9332D-GX2B-02', to: 'Nexus-9364E-SG2-02', utilization: 28, status: 'healthy' }
+    // Leaf-01 connections
+    { from: 'Leaf-01', to: 'Spine-01', utilization: 45, status: 'healthy' },
+    { from: 'Leaf-01', to: 'Spine-02', utilization: 42, status: 'healthy' },
+
+    // Leaf-02 connections
+    { from: 'Leaf-02', to: 'Spine-01', utilization: 38, status: 'healthy' },
+    { from: 'Leaf-02', to: 'Spine-02', utilization: 40, status: 'healthy' },
+
+    // Leaf-03 connections
+    { from: 'Leaf-03', to: 'Spine-01', utilization: 52, status: 'healthy' },
+    { from: 'Leaf-03', to: 'Spine-02', utilization: 48, status: 'healthy' },
+
+    // Leaf-04 connections
+    { from: 'Leaf-04', to: 'Spine-01', utilization: 35, status: 'healthy' },
+    { from: 'Leaf-04', to: 'Spine-02', utilization: 33, status: 'healthy' },
+
+    // Leaf-05 connections
+    { from: 'Leaf-05', to: 'Spine-01', utilization: 62, status: 'healthy' },
+    { from: 'Leaf-05', to: 'Spine-02', utilization: 58, status: 'healthy' },
+
+    // Leaf-06 connections
+    { from: 'Leaf-06', to: 'Spine-01', utilization: 41, status: 'healthy' },
+    { from: 'Leaf-06', to: 'Spine-02', utilization: 44, status: 'healthy' },
+
+    // Leaf-07 connections
+    { from: 'Leaf-07', to: 'Spine-01', utilization: 55, status: 'healthy' },
+    { from: 'Leaf-07', to: 'Spine-02', utilization: 53, status: 'healthy' },
+
+    // Leaf-08 connections
+    { from: 'Leaf-08', to: 'Spine-01', utilization: 68, status: 'healthy' },
+    { from: 'Leaf-08', to: 'Spine-02', utilization: 70, status: 'healthy' },
+
+    // Leaf-09 connections
+    { from: 'Leaf-09', to: 'Spine-01', utilization: 47, status: 'healthy' },
+    { from: 'Leaf-09', to: 'Spine-02', utilization: 45, status: 'healthy' },
+
+    // Leaf-10 connections
+    { from: 'Leaf-10', to: 'Spine-01', utilization: 39, status: 'healthy' },
+    { from: 'Leaf-10', to: 'Spine-02', utilization: 36, status: 'healthy' },
+
+    // Leaf-11 connections
+    { from: 'Leaf-11', to: 'Spine-01', utilization: 78, status: 'warning' },
+    { from: 'Leaf-11', to: 'Spine-02', utilization: 75, status: 'warning' },
+
+    // Leaf-12 connections
+    { from: 'Leaf-12', to: 'Spine-01', utilization: 43, status: 'healthy' },
+    { from: 'Leaf-12', to: 'Spine-02', utilization: 41, status: 'healthy' }
 ];
 
 // Tenants - 10 total with varying GPU allocations
