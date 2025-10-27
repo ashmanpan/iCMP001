@@ -15,11 +15,29 @@
         <!-- Sidebar -->
         <div class="sidebar" style="background: var(--bg-secondary); border-right: 1px solid var(--border-primary); padding: 2rem 0; position: sticky; top: 0; height: 100vh;">
             <div class="sidebar-logo" style="padding: 0 1.5rem; margin-bottom: 2rem;">
-                <div class="logo">
-                    <div class="logo-icon" style="width: 40px; height: 40px; background: var(--cisco-blue); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                        <i class="fas fa-cloud"></i>
+                <!-- Official Cisco Logo -->
+                <div style="padding: 1rem 0; border-bottom: 1px solid var(--border-primary); margin-bottom: 1rem;">
+                    <img src="https://www.cisco.com/c/en/us/about/brand-center/network-cisco-logo/_jcr_content/root/container/container_copy/container/image.img.png/1688583623962.png"
+                         alt="Cisco Logo"
+                         style="width: 100%; max-width: 150px; height: auto; display: block;"
+                         onerror="this.style.display='none'; this.parentElement.querySelector('.logo-fallback').style.display='flex';">
+                    <!-- Fallback -->
+                    <div class="logo logo-fallback" style="display: none;">
+                        <div class="logo-icon" style="width: 40px; height: 40px; background: var(--cisco-blue); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="brand-name">Cisco CMP</div>
                     </div>
-                    <div class="brand-name">Cisco CMP</div>
+                </div>
+
+                <!-- Partner Branding -->
+                <div style="padding-bottom: 1rem; border-bottom: 1px solid var(--border-primary);">
+                    <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.25rem; text-align: center;">
+                        Powered by
+                    </div>
+                    <div style="background: linear-gradient(135deg, #049FD9 0%, #00ff88 100%); padding: 0.4rem 1rem; border-radius: 6px; font-weight: 700; font-size: 0.9rem; text-align: center; letter-spacing: 0.05em;">
+                        Aarna.ml
+                    </div>
                 </div>
             </div>
 

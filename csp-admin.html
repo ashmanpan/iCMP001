@@ -265,11 +265,29 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <div class="sidebar-logo">
-                <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-cloud"></i>
+                <!-- Official Cisco Logo -->
+                <div style="padding: 1rem; border-bottom: 1px solid var(--border-primary); margin-bottom: 1rem;">
+                    <img src="https://www.cisco.com/c/en/us/about/brand-center/network-cisco-logo/_jcr_content/root/container/container_copy/container/image.img.png/1688583623962.png"
+                         alt="Cisco Logo"
+                         style="width: 100%; max-width: 150px; height: auto; display: block;"
+                         onerror="this.style.display='none'; this.parentElement.querySelector('.logo-fallback').style.display='flex';">
+                    <!-- Fallback -->
+                    <div class="logo logo-fallback" style="display: none;">
+                        <div class="logo-icon">
+                            <i class="fas fa-cloud"></i>
+                        </div>
+                        <div class="brand-name">Cisco CMP</div>
                     </div>
-                    <div class="brand-name">Cisco CMP</div>
+                </div>
+
+                <!-- Partner Branding -->
+                <div style="padding: 0 1rem 1rem; border-bottom: 1px solid var(--border-primary);">
+                    <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.25rem; text-align: center;">
+                        Powered by
+                    </div>
+                    <div style="background: linear-gradient(135deg, #049FD9 0%, #00ff88 100%); padding: 0.4rem 1rem; border-radius: 6px; font-weight: 700; font-size: 0.9rem; text-align: center; letter-spacing: 0.05em;">
+                        Aarna.ml
+                    </div>
                 </div>
             </div>
 
