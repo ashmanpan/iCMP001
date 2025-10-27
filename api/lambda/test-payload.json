@@ -1,0 +1,6 @@
+{
+  "message": "Hello, what services are available in the Cisco iCMP platform?",
+  "role": "tenant-user",
+  "tenant_id": "tenant-001",
+  "user_email": "test@example.com"
+}

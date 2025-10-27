@@ -1,0 +1,48 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:ap-south-1:*:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:InvokeModel"
+            ],
+            "Resource": [
+                "arn:aws:bedrock:ap-south-1::foundation-model/anthropic.claude-sonnet-4*",
+                "arn:aws:bedrock:ap-south-1::foundation-model/anthropic.claude-3*",
+                "arn:aws:bedrock:::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0",
+                "arn:aws:bedrock:::foundation-model/anthropic.claude-sonnet-4*",
+                "arn:aws:bedrock:ap-south-1:567097740753:inference-profile/global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+                "arn:aws:bedrock:ap-south-1:567097740753:inference-profile/apac.anthropic.*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Scan",
+                "dynamodb:Query"
+            ],
+            "Resource": [
+                "arn:aws:dynamodb:ap-south-1:*:table/cisco-cmp-tenants",
+                "arn:aws:dynamodb:ap-south-1:*:table/cisco-cmp-gpus",
+                "arn:aws:dynamodb:ap-south-1:*:table/cisco-cmp-ucs-servers",
+                "arn:aws:dynamodb:ap-south-1:*:table/cisco-cmp-nexus-fabric",
+                "arn:aws:dynamodb:ap-south-1:*:table/cisco-cmp-services",
+                "arn:aws:dynamodb:ap-south-1:*:table/cisco-cmp-logs",
+                "arn:aws:dynamodb:ap-south-1:*:table/cisco-cmp-users"
+            ]
+        }
+    ]
+}
