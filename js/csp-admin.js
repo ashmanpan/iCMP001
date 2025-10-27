@@ -142,7 +142,12 @@ function createConsumptionChart() {
 // Load Tenants List
 function loadTenantsList() {
     const tenantsList = document.getElementById('tenantsList');
-    tenantsList.innerHTML = mockTenants.map(tenant => `
+    tenantsList.innerHTML = mockTenants.map(tenant => {
+        const enabledServices = tenant.services || [];
+        const allServiceIds = mockServices.map(s => s.id);
+        const lockedServices = allServiceIds.filter(id => !enabledServices.includes(id));
+
+        return `
         <div class="tenant-card">
             <div class="tenant-header">
                 <div>
@@ -171,18 +176,64 @@ function loadTenantsList() {
                 <div class="tenant-stat">
                     <div class="tenant-stat-value">$${tenant.currentSpend.toLocaleString()}</div>
                     <div class="tenant-stat-label">Current Spend</div>
+                    ${getSpendingTrend(tenant)}
                 </div>
                 <div class="tenant-stat">
                     <div class="tenant-stat-value">$${tenant.monthlyBudget.toLocaleString()}</div>
                     <div class="tenant-stat-label">Budget</div>
+                    <div style="font-size: 0.7rem; margin-top: 0.25rem;">
+                        <span style="color: ${tenant.currentSpend > tenant.monthlyBudget * 0.8 ? 'var(--accent-red)' : 'var(--accent-green)'};">
+                            ${((tenant.currentSpend / tenant.monthlyBudget) * 100).toFixed(0)}% Used
+                        </span>
+                    </div>
                 </div>
                 <div class="tenant-stat">
-                    <div class="tenant-stat-value">${tenant.services.length}</div>
+                    <div class="tenant-stat-value">${enabledServices.length}/${allServiceIds.length}</div>
                     <div class="tenant-stat-label">Active Services</div>
                 </div>
             </div>
+
+            <!-- Services Status -->
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-primary);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <h4 style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">
+                        <i class="fas fa-server"></i> Services Access
+                    </h4>
+                    <div style="display: flex; gap: 1rem; font-size: 0.75rem;">
+                        <span style="color: var(--accent-green);">
+                            <i class="fas fa-unlock"></i> ${enabledServices.length} Enabled
+                        </span>
+                        <span style="color: var(--text-muted);">
+                            <i class="fas fa-lock"></i> ${lockedServices.length} Locked
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    ${mockServices.map(service => {
+                        const isEnabled = enabledServices.includes(service.id);
+                        return `
+                            <div style="
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 0.5rem;
+                                padding: 0.4rem 0.75rem;
+                                background: ${isEnabled ? 'rgba(0, 255, 136, 0.1)' : 'var(--bg-tertiary)'};
+                                border: 1px solid ${isEnabled ? 'var(--accent-green)' : 'var(--border-primary)'};
+                                border-radius: 6px;
+                                font-size: 0.75rem;
+                                color: ${isEnabled ? 'var(--accent-green)' : 'var(--text-muted)'};
+                            ">
+                                <i class="fas fa-${isEnabled ? 'unlock' : 'lock'}" style="font-size: 0.7rem;"></i>
+                                <span>${service.icon} ${service.name.replace(' as a Service', '')}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // Load GPUs
@@ -345,6 +396,7 @@ function loadFabric() {
         <tr>
             <td>${sw.id}</td>
             <td>${sw.model}</td>
+            <td><span class="badge badge-${sw.type === 'Spine' ? 'info' : 'success'}">${sw.type}</span></td>
             <td>${sw.ports}</td>
             <td>${sw.connectedServers}</td>
             <td><span class="badge badge-${sw.status === 'healthy' ? 'success' : 'warning'}">${sw.status}</span></td>
@@ -362,6 +414,159 @@ function loadFabric() {
             <td><span class="badge badge-${server.status === 'online' ? 'success' : 'warning'}">${server.status}</span></td>
         </tr>
     `).join('');
+
+    // Initialize topology view (but don't render until tab is clicked)
+}
+
+// Switch Fabric Tab
+function switchFabricTab(tab) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('.fabric-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Show/hide views
+    const tableView = document.getElementById('fabricTableView');
+    const topologyView = document.getElementById('fabricTopologyView');
+
+    if (tab === 'table') {
+        tableView.style.display = 'block';
+        topologyView.style.display = 'none';
+    } else {
+        tableView.style.display = 'none';
+        topologyView.style.display = 'block';
+        renderTopologyView();
+    }
+}
+
+// Render Topology View with Spine-Leaf Architecture
+function renderTopologyView() {
+    const container = document.getElementById('topologyContainer');
+    const width = container.offsetWidth || 1000;
+    const height = 600;
+
+    // Separate switches by type
+    const spineSwitches = mockNexusFabric.filter(sw => sw.type === 'Spine');
+    const leafSwitches = mockNexusFabric.filter(sw => sw.type === 'Leaf');
+
+    // Calculate positions
+    const spineY = 100;
+    const leafY = 450;
+    const spineSpacing = width / (spineSwitches.length + 1);
+    const leafSpacing = width / (leafSwitches.length + 1);
+
+    // Create SVG
+    let svg = `
+        <svg width="${width}" height="${height}" style="width: 100%; height: auto;">
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="rgba(4, 159, 217, 0.5)" />
+                </marker>
+            </defs>
+    `;
+
+    // Draw links first (so they appear behind switches)
+    mockFabricLinks.forEach(link => {
+        const fromSwitch = mockNexusFabric.find(sw => sw.id === link.from);
+        const toSwitch = mockNexusFabric.find(sw => sw.id === link.to);
+
+        const fromIndex = fromSwitch.type === 'Leaf' ?
+            leafSwitches.findIndex(sw => sw.id === link.from) :
+            spineSwitches.findIndex(sw => sw.id === link.from);
+        const toIndex = toSwitch.type === 'Spine' ?
+            spineSwitches.findIndex(sw => sw.id === link.to) :
+            leafSwitches.findIndex(sw => sw.id === link.to);
+
+        const x1 = fromSwitch.type === 'Leaf' ?
+            leafSpacing * (fromIndex + 1) :
+            spineSpacing * (fromIndex + 1);
+        const y1 = fromSwitch.type === 'Leaf' ? leafY : spineY;
+        const x2 = toSwitch.type === 'Spine' ?
+            spineSpacing * (toIndex + 1) :
+            leafSpacing * (toIndex + 1);
+        const y2 = toSwitch.type === 'Spine' ? spineY : leafY;
+
+        // Color based on utilization
+        let linkColor = 'rgba(0, 255, 136, 0.5)'; // Green
+        if (link.utilization > 70) linkColor = 'rgba(255, 193, 7, 0.7)'; // Yellow
+        if (link.utilization > 85) linkColor = 'rgba(255, 68, 68, 0.7)'; // Red
+
+        const strokeWidth = 2;
+
+        svg += `
+            <g class="topology-link">
+                <line x1="${x1}" y1="${y1 + 60}" x2="${x2}" y2="${y2 + 60}"
+                      stroke="${linkColor}" stroke-width="${strokeWidth}"
+                      marker-end="url(#arrowhead)" />
+                <text x="${(x1 + x2) / 2}" y="${(y1 + y2) / 2 + 60}"
+                      fill="var(--text-secondary)" font-size="12" text-anchor="middle"
+                      style="background: var(--bg-card); padding: 2px;">
+                    ${link.utilization}%
+                </text>
+            </g>
+        `;
+    });
+
+    // Draw Spine Switches
+    svg += `<text x="${width / 2}" y="30" fill="var(--cisco-blue)" font-size="18" font-weight="600" text-anchor="middle">Spine Layer (Core)</text>`;
+    spineSwitches.forEach((sw, idx) => {
+        const x = spineSpacing * (idx + 1);
+        const y = spineY;
+        const statusColor = sw.status === 'healthy' ? 'var(--accent-green)' :
+                           sw.status === 'warning' ? 'var(--accent-yellow)' : 'var(--accent-red)';
+
+        svg += `
+            <g class="topology-switch" onclick="showSwitchInfo('${sw.id}')">
+                <rect x="${x - 60}" y="${y}" width="120" height="100"
+                      fill="var(--bg-card)" stroke="${statusColor}" stroke-width="3" rx="8" />
+                <text x="${x}" y="${y + 25}" fill="var(--text-primary)" font-size="14" font-weight="600" text-anchor="middle">${sw.id}</text>
+                <text x="${x}" y="${y + 45}" fill="var(--text-secondary)" font-size="11" text-anchor="middle">${sw.model}</text>
+                <text x="${x}" y="${y + 65}" fill="var(--cisco-blue)" font-size="10" text-anchor="middle">${sw.ports} Ports</text>
+                <circle cx="${x}" cy="${y + 85}" r="6" fill="${statusColor}" />
+            </g>
+        `;
+    });
+
+    // Draw Leaf Switches
+    svg += `<text x="${width / 2}" y="380" fill="var(--accent-green)" font-size="18" font-weight="600" text-anchor="middle">Leaf Layer (Access)</text>`;
+    leafSwitches.forEach((sw, idx) => {
+        const x = leafSpacing * (idx + 1);
+        const y = leafY;
+        const statusColor = sw.status === 'healthy' ? 'var(--accent-green)' :
+                           sw.status === 'warning' ? 'var(--accent-yellow)' : 'var(--accent-red)';
+
+        svg += `
+            <g class="topology-switch" onclick="showSwitchInfo('${sw.id}')">
+                <rect x="${x - 60}" y="${y}" width="120" height="100"
+                      fill="var(--bg-card)" stroke="${statusColor}" stroke-width="3" rx="8" />
+                <text x="${x}" y="${y + 25}" fill="var(--text-primary)" font-size="14" font-weight="600" text-anchor="middle">${sw.id}</text>
+                <text x="${x}" y="${y + 45}" fill="var(--text-secondary)" font-size="11" text-anchor="middle">${sw.model}</text>
+                <text x="${x}" y="${y + 65}" fill="var(--cisco-blue)" font-size="10" text-anchor="middle">${sw.ports} Ports</text>
+                <circle cx="${x}" cy="${y + 85}" r="6" fill="${statusColor}" />
+            </g>
+        `;
+    });
+
+    svg += '</svg>';
+    container.innerHTML = svg;
+}
+
+// Show switch details on click
+function showSwitchInfo(switchId) {
+    const sw = mockNexusFabric.find(s => s.id === switchId);
+    const links = mockFabricLinks.filter(l => l.from === switchId || l.to === switchId);
+
+    const linksHtml = links.map(l => {
+        const otherSwitch = l.from === switchId ? l.to : l.from;
+        const direction = l.from === switchId ? '→' : '←';
+        return `<div>${direction} ${otherSwitch}: ${l.utilization}%</div>`;
+    }).join('');
+
+    alert(`Switch: ${sw.id}\nModel: ${sw.model}\nType: ${sw.type}\nPorts: ${sw.ports}\nStatus: ${sw.status}\n\nLink Utilization:\n${links.map(l => {
+        const otherSwitch = l.from === switchId ? l.to : l.from;
+        const direction = l.from === switchId ? '→' : '←';
+        return `${direction} ${otherSwitch}: ${l.utilization}%`;
+    }).join('\n')}`);
 }
 
 // Load Logs
@@ -512,6 +717,40 @@ function viewTenantDetails(tenantId) {
     }
 }
 
+// Helper function to get spending trend
+function getSpendingTrend(tenant) {
+    // Calculate trend based on current spending vs budget
+    const spendPercentage = (tenant.currentSpend / tenant.monthlyBudget) * 100;
+    const projectedSpend = tenant.currentSpend * 1.15; // Simulate 15% growth trend
+
+    let trendIcon, trendColor, trendText;
+
+    if (projectedSpend > tenant.monthlyBudget) {
+        trendIcon = 'fa-arrow-up';
+        trendColor = 'var(--accent-red)';
+        trendText = '+15% ↗️';
+    } else if (spendPercentage > 70) {
+        trendIcon = 'fa-arrow-up';
+        trendColor = 'var(--accent-yellow)';
+        trendText = '+8% ↗️';
+    } else if (spendPercentage > 50) {
+        trendIcon = 'fa-arrow-right';
+        trendColor = 'var(--cisco-blue)';
+        trendText = 'Stable →';
+    } else {
+        trendIcon = 'fa-arrow-down';
+        trendColor = 'var(--accent-green)';
+        trendText = '-5% ↘️';
+    }
+
+    return `
+        <div style="font-size: 0.7rem; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.25rem; justify-content: center;">
+            <i class="fas ${trendIcon}" style="color: ${trendColor}; font-size: 0.6rem;"></i>
+            <span style="color: ${trendColor};">${trendText}</span>
+        </div>
+    `;
+}
+
 // Helper function for badge classes
 function getBadgeClass(status) {
     const map = {
@@ -521,6 +760,154 @@ function getBadgeClass(status) {
         'maintenance': 'error'
     };
     return map[status] || 'info';
+}
+
+// Search tenants
+let currentFilter = 'all';
+function searchTenants(searchTerm) {
+    const filtered = mockTenants.filter(tenant => {
+        const matchesSearch =
+            tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            tenant.allocatedGPUs.toString().includes(searchTerm) ||
+            tenant.monthlyBudget.toString().includes(searchTerm) ||
+            tenant.users.toString().includes(searchTerm);
+
+        const matchesFilter = applyFilter(tenant, currentFilter);
+
+        return matchesSearch && matchesFilter;
+    });
+
+    renderFilteredTenants(filtered);
+}
+
+// Filter tenants by size
+function filterTenants(filter) {
+    currentFilter = filter;
+    const searchTerm = document.getElementById('tenantSearch').value;
+    searchTenants(searchTerm);
+}
+
+// Apply filter logic
+function applyFilter(tenant, filter) {
+    switch(filter) {
+        case 'large':
+            return tenant.allocatedGPUs >= 100;
+        case 'medium':
+            return tenant.allocatedGPUs >= 30 && tenant.allocatedGPUs < 100;
+        case 'small':
+            return tenant.allocatedGPUs < 30;
+        case 'all':
+        default:
+            return true;
+    }
+}
+
+// Render filtered tenants
+function renderFilteredTenants(tenants) {
+    const tenantsList = document.getElementById('tenantsList');
+
+    if (tenants.length === 0) {
+        tenantsList.innerHTML = `
+            <div class="card" style="text-align: center; padding: 3rem;">
+                <i class="fas fa-search" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                <p style="color: var(--text-secondary);">No tenants found matching your search criteria</p>
+            </div>
+        `;
+        return;
+    }
+
+    tenantsList.innerHTML = tenants.map(tenant => {
+        const enabledServices = tenant.services || [];
+        const allServiceIds = mockServices.map(s => s.id);
+        const lockedServices = allServiceIds.filter(id => !enabledServices.includes(id));
+
+        return `
+        <div class="tenant-card">
+            <div class="tenant-header">
+                <div>
+                    <h3>${tenant.name}</h3>
+                    <span class="badge badge-success">${tenant.status}</span>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-secondary" onclick="viewTenantDetails('${tenant.id}')">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                </div>
+            </div>
+            <div class="tenant-stats">
+                <div class="tenant-stat">
+                    <div class="tenant-stat-value">${tenant.allocatedGPUs}</div>
+                    <div class="tenant-stat-label">Allocated GPUs</div>
+                </div>
+                <div class="tenant-stat">
+                    <div class="tenant-stat-value">${tenant.users}</div>
+                    <div class="tenant-stat-label">Users</div>
+                </div>
+                <div class="tenant-stat">
+                    <div class="tenant-stat-value">${tenant.consumptionRate.toFixed(1)}%</div>
+                    <div class="tenant-stat-label">Consumption</div>
+                </div>
+                <div class="tenant-stat">
+                    <div class="tenant-stat-value">$${tenant.currentSpend.toLocaleString()}</div>
+                    <div class="tenant-stat-label">Current Spend</div>
+                    ${getSpendingTrend(tenant)}
+                </div>
+                <div class="tenant-stat">
+                    <div class="tenant-stat-value">$${tenant.monthlyBudget.toLocaleString()}</div>
+                    <div class="tenant-stat-label">Budget</div>
+                    <div style="font-size: 0.7rem; margin-top: 0.25rem;">
+                        <span style="color: ${tenant.currentSpend > tenant.monthlyBudget * 0.8 ? 'var(--accent-red)' : 'var(--accent-green)'};">
+                            ${((tenant.currentSpend / tenant.monthlyBudget) * 100).toFixed(0)}% Used
+                        </span>
+                    </div>
+                </div>
+                <div class="tenant-stat">
+                    <div class="tenant-stat-value">${enabledServices.length}/${allServiceIds.length}</div>
+                    <div class="tenant-stat-label">Active Services</div>
+                </div>
+            </div>
+
+            <!-- Services Status -->
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-primary);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <h4 style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">
+                        <i class="fas fa-server"></i> Services Access
+                    </h4>
+                    <div style="display: flex; gap: 1rem; font-size: 0.75rem;">
+                        <span style="color: var(--accent-green);">
+                            <i class="fas fa-unlock"></i> ${enabledServices.length} Enabled
+                        </span>
+                        <span style="color: var(--text-muted);">
+                            <i class="fas fa-lock"></i> ${lockedServices.length} Locked
+                        </span>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    ${mockServices.map(service => {
+                        const isEnabled = enabledServices.includes(service.id);
+                        return `
+                            <div style="
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 0.5rem;
+                                padding: 0.4rem 0.75rem;
+                                background: ${isEnabled ? 'rgba(0, 255, 136, 0.1)' : 'var(--bg-tertiary)'};
+                                border: 1px solid ${isEnabled ? 'var(--accent-green)' : 'var(--border-primary)'};
+                                border-radius: 6px;
+                                font-size: 0.75rem;
+                                color: ${isEnabled ? 'var(--accent-green)' : 'var(--text-muted)'};
+                            ">
+                                <i class="fas fa-${isEnabled ? 'unlock' : 'lock'}" style="font-size: 0.7rem;"></i>
+                                <span>${service.icon} ${service.name.replace(' as a Service', '')}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        </div>
+        `;
+    }).join('');
 }
 
 // Logout

@@ -82,51 +82,146 @@ const mockUCSServers = [
     { id: 'UCS-007', name: 'UCS-C220-M6', rack: 'Rack-4', nexusSwitch: 'Nexus-9K-04', status: 'maintenance', gpuCount: 2 }
 ];
 
-// Nexus Fabric
+// Nexus Fabric - Spine-Leaf Architecture
 const mockNexusFabric = [
-    { id: 'Nexus-9K-01', model: 'Nexus 9336C-FX2', ports: 36, connectedServers: 2, status: 'healthy' },
-    { id: 'Nexus-9K-02', model: 'Nexus 9364C', ports: 64, connectedServers: 2, status: 'healthy' },
-    { id: 'Nexus-9K-03', model: 'Nexus 9336C-FX2', ports: 36, connectedServers: 2, status: 'healthy' },
-    { id: 'Nexus-9K-04', model: 'Nexus 9364C', ports: 64, connectedServers: 1, status: 'warning' }
+    // Spine Switches (Core Layer)
+    { id: 'Nexus-9K-02', model: 'Nexus 9364C', type: 'Spine', ports: 64, connectedServers: 2, status: 'healthy' },
+    { id: 'Nexus-9K-04', model: 'Nexus 9364C', type: 'Spine', ports: 64, connectedServers: 1, status: 'warning' },
+
+    // Leaf Switches (Access Layer)
+    { id: 'Nexus-9K-01', model: 'Nexus 9336C-FX2', type: 'Leaf', ports: 36, connectedServers: 2, status: 'healthy' },
+    { id: 'Nexus-9K-03', model: 'Nexus 9336C-FX2', type: 'Leaf', ports: 36, connectedServers: 2, status: 'healthy' }
 ];
 
-// Tenants
+// Link Utilization between Spine and Leaf Switches (in %)
+const mockFabricLinks = [
+    { from: 'Nexus-9K-01', to: 'Nexus-9K-02', utilization: 45, status: 'healthy' },
+    { from: 'Nexus-9K-01', to: 'Nexus-9K-04', utilization: 72, status: 'warning' },
+    { from: 'Nexus-9K-03', to: 'Nexus-9K-02', utilization: 38, status: 'healthy' },
+    { from: 'Nexus-9K-03', to: 'Nexus-9K-04', utilization: 28, status: 'healthy' }
+];
+
+// Tenants - 10 total with varying GPU allocations
 const mockTenants = [
     {
         id: 'tenant-001',
         name: 'TechCorp AI Division',
         status: 'active',
         created: '2024-01-15',
-        allocatedGPUs: 3,
+        allocatedGPUs: 45,
         consumptionRate: 85.5,
-        services: ['llm', 'fineTuning', 'cv'],
-        users: 15,
-        monthlyBudget: 50000,
-        currentSpend: 42500
+        services: ['llm', 'fineTuning', 'cv', 'rag', 'agentic'],
+        users: 85,
+        monthlyBudget: 280000,
+        currentSpend: 239200
     },
     {
         id: 'tenant-002',
-        name: 'FinanceAI Solutions',
+        name: 'Global Bank Analytics',
         status: 'active',
-        created: '2024-02-10',
-        allocatedGPUs: 2,
-        consumptionRate: 72.3,
-        services: ['llm', 'rag', 'byom'],
-        users: 8,
-        monthlyBudget: 35000,
-        currentSpend: 25300
+        created: '2023-11-20',
+        allocatedGPUs: 120,
+        consumptionRate: 92.7,
+        services: ['llm', 'rag', 'byom', 'fineTuning', 'buildAI'],
+        users: 240,
+        monthlyBudget: 750000,
+        currentSpend: 695250
     },
     {
         id: 'tenant-003',
-        name: 'HealthTech Research',
+        name: 'HealthTech Research Institute',
         status: 'active',
         created: '2024-03-05',
-        allocatedGPUs: 1,
-        consumptionRate: 45.8,
-        services: ['cv', 'agentic'],
-        users: 5,
-        monthlyBudget: 20000,
-        currentSpend: 9160
+        allocatedGPUs: 35,
+        consumptionRate: 68.4,
+        services: ['cv', 'agentic', 'llm', 'rag'],
+        users: 65,
+        monthlyBudget: 220000,
+        currentSpend: 150480
+    },
+    {
+        id: 'tenant-004',
+        name: 'RetailAI Corporation',
+        status: 'active',
+        created: '2024-02-14',
+        allocatedGPUs: 28,
+        consumptionRate: 74.2,
+        services: ['cv', 'llm', 'rag'],
+        users: 42,
+        monthlyBudget: 175000,
+        currentSpend: 129850
+    },
+    {
+        id: 'tenant-005',
+        name: 'AutoDrive Technologies',
+        status: 'active',
+        created: '2023-09-10',
+        allocatedGPUs: 180,
+        consumptionRate: 95.8,
+        services: ['cv', 'llm', 'fineTuning', 'byom', 'agentic', 'buildAI', 'rag', 'bareMetal'],
+        users: 320,
+        monthlyBudget: 1200000,
+        currentSpend: 1149600
+    },
+    {
+        id: 'tenant-006',
+        name: 'PharmaTech AI Labs',
+        status: 'active',
+        created: '2024-01-08',
+        allocatedGPUs: 55,
+        consumptionRate: 81.5,
+        services: ['llm', 'fineTuning', 'rag', 'agentic', 'byom'],
+        users: 125,
+        monthlyBudget: 340000,
+        currentSpend: 277100
+    },
+    {
+        id: 'tenant-007',
+        name: 'MediaStream Analytics',
+        status: 'active',
+        created: '2024-04-02',
+        allocatedGPUs: 22,
+        consumptionRate: 56.3,
+        services: ['cv', 'llm'],
+        users: 28,
+        monthlyBudget: 140000,
+        currentSpend: 78820
+    },
+    {
+        id: 'tenant-008',
+        name: 'SecurityAI Systems',
+        status: 'active',
+        created: '2023-12-15',
+        allocatedGPUs: 65,
+        consumptionRate: 88.9,
+        services: ['cv', 'agentic', 'llm', 'fineTuning', 'rag'],
+        users: 95,
+        monthlyBudget: 410000,
+        currentSpend: 364490
+    },
+    {
+        id: 'tenant-009',
+        name: 'CloudNative Startup Hub',
+        status: 'active',
+        created: '2024-05-20',
+        allocatedGPUs: 18,
+        consumptionRate: 42.7,
+        services: ['llm', 'buildAI'],
+        users: 15,
+        monthlyBudget: 95000,
+        currentSpend: 40565
+    },
+    {
+        id: 'tenant-010',
+        name: 'Enterprise AI Platform',
+        status: 'active',
+        created: '2023-08-05',
+        allocatedGPUs: 200,
+        consumptionRate: 97.2,
+        services: ['llm', 'fineTuning', 'cv', 'rag', 'agentic', 'byom', 'buildAI', 'bareMetal', 'gpuVM'],
+        users: 450,
+        monthlyBudget: 1500000,
+        currentSpend: 1458000
     }
 ];
 

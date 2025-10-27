@@ -205,6 +205,47 @@
             font-size: 0.75rem;
             color: var(--text-muted);
         }
+
+        /* Fabric Tabs */
+        .fabric-tab.active {
+            color: var(--cisco-blue) !important;
+            border-bottom-color: var(--cisco-blue) !important;
+        }
+
+        .fabric-tab:hover {
+            color: var(--text-primary);
+        }
+
+        /* Topology Styles */
+        .topology-switch {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .topology-switch:hover {
+            filter: brightness(1.2);
+        }
+
+        .topology-link {
+            transition: all 0.2s;
+        }
+
+        .topology-link:hover {
+            stroke-width: 3;
+        }
+
+        .topology-switch-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .topology-info-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-cisco);
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 <body>
@@ -368,7 +409,29 @@
                         <span data-i18n="createTenant">Create Tenant</span>
                     </button>
                 </div>
-                <div id="tenantsList"></div>
+
+                <!-- Search and Filter -->
+                <div class="card mb-lg" style="padding: 1rem;">
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <div style="flex: 1;">
+                            <input
+                                type="text"
+                                class="form-input"
+                                id="tenantSearch"
+                                placeholder="🔍 Search tenants by name, GPU count, budget..."
+                                oninput="searchTenants(this.value)"
+                                style="margin: 0;">
+                        </div>
+                        <select class="form-select" onchange="filterTenants(this.value)" style="width: 200px;">
+                            <option value="all">All Tenants (10)</option>
+                            <option value="large">Large (100+ GPUs)</option>
+                            <option value="medium">Medium (30-99 GPUs)</option>
+                            <option value="small">Small (<30 GPUs)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="tenantsList" style="max-height: 800px; overflow-y: auto;"></div>
             </div>
 
             <!-- GPUs Section -->
@@ -432,20 +495,61 @@
             <!-- Nexus Fabric Section -->
             <div id="fabric" class="section">
                 <h2 class="mb-lg">Cisco Nexus Fabric Discovery</h2>
-                <div class="card">
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Switch ID</th>
-                                    <th>Model</th>
-                                    <th>Ports</th>
-                                    <th>Connected Servers</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="fabricTable"></tbody>
-                        </table>
+
+                <!-- Tab Navigation -->
+                <div class="fabric-tabs" style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-primary);">
+                    <button class="fabric-tab active" onclick="switchFabricTab('table')" style="background: none; border: none; padding: 1rem 2rem; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                        <i class="fas fa-table"></i> Table View
+                    </button>
+                    <button class="fabric-tab" onclick="switchFabricTab('topology')" style="background: none; border: none; padding: 1rem 2rem; color: var(--text-secondary); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s;">
+                        <i class="fas fa-project-diagram"></i> Topology View
+                    </button>
+                </div>
+
+                <!-- Table View -->
+                <div id="fabricTableView" class="fabric-view">
+                    <div class="card">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Switch ID</th>
+                                        <th>Model</th>
+                                        <th>Type</th>
+                                        <th>Ports</th>
+                                        <th>Connected Servers</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fabricTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Topology View -->
+                <div id="fabricTopologyView" class="fabric-view" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-network-wired"></i> Spine-Leaf Network Topology
+                            </h3>
+                            <div style="display: flex; gap: 1.5rem; font-size: 0.875rem;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--accent-green);"></div>
+                                    <span>Healthy</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--accent-yellow);"></div>
+                                    <span>Warning</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 12px; height: 12px; border-radius: 50%; background: var(--accent-red);"></div>
+                                    <span>Critical</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="topologyContainer" style="padding: 2rem; min-height: 600px; background: var(--bg-secondary); border-radius: 8px;"></div>
                     </div>
                 </div>
 
