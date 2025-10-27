@@ -71,15 +71,20 @@ const mockGPUs = {
     ]
 };
 
-// UCS Servers
+// UCS GPU Servers - AI-Optimized Models
 const mockUCSServers = [
-    { id: 'UCS-001', name: 'UCS-C240-M6', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2 },
-    { id: 'UCS-002', name: 'UCS-C480-M5', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2 },
-    { id: 'UCS-003', name: 'UCS-C240-M6', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 2 },
-    { id: 'UCS-004', name: 'UCS-C220-M6', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 2 },
-    { id: 'UCS-005', name: 'UCS-C480-M5', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2 },
-    { id: 'UCS-006', name: 'UCS-C240-M6', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 2 },
-    { id: 'UCS-007', name: 'UCS-C220-M6', rack: 'Rack-4', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'maintenance', gpuCount: 2 }
+    // UCS C225 M8 - Up to 3 GPUs (1RU, single socket)
+    { id: 'UCS-001', name: 'UCS-C225-M8', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2, gpuModel: 'NVIDIA H100 NVL' },
+    { id: 'UCS-002', name: 'UCS-C225-M8', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 3, gpuModel: 'NVIDIA L40S' },
+
+    // UCS C845A M8 - 2-8 GPUs (AI Inference Optimized)
+    { id: 'UCS-003', name: 'UCS-C845A-M8', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 4, gpuModel: 'NVIDIA H200 NVL' },
+    { id: 'UCS-004', name: 'UCS-C845A-M8', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 8, gpuModel: 'NVIDIA H100 NVL' },
+    { id: 'UCS-005', name: 'UCS-C845A-M8', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2, gpuModel: 'AMD MI210' },
+
+    // UCS C885A M8 - 8 GPUs (AI Training Optimized)
+    { id: 'UCS-006', name: 'UCS-C885A-M8', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 8, gpuModel: 'NVIDIA H200' },
+    { id: 'UCS-007', name: 'UCS-C885A-M8', rack: 'Rack-4', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'maintenance', gpuCount: 8, gpuModel: 'AMD MI300X' }
 ];
 
 // Nexus Fabric - AI-Optimized Spine-Leaf Architecture

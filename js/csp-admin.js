@@ -408,10 +408,11 @@ function loadFabric() {
     ucsTable.innerHTML = mockUCSServers.map(server => `
         <tr>
             <td>${server.id}</td>
-            <td>${server.name}</td>
+            <td><strong>${server.name}</strong></td>
             <td>${server.rack}</td>
-            <td>${server.nexusSwitch}</td>
-            <td>${server.gpuCount}</td>
+            <td style="font-size: 0.85rem;">${server.nexusSwitch}</td>
+            <td><strong style="color: var(--cisco-blue);">${server.gpuCount}x</strong></td>
+            <td style="color: var(--text-secondary);">${server.gpuModel}</td>
             <td><span class="badge badge-${server.status === 'online' ? 'success' : 'warning'}">${server.status}</span></td>
         </tr>
     `).join('');
