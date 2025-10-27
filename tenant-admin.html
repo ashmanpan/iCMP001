@@ -46,9 +46,13 @@
                     <i class="fas fa-th-large"></i>
                     <span data-i18n="dashboard">Dashboard</span>
                 </li>
+                <li class="menu-item" onclick="showSection('catalog')" style="padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; color: var(--text-secondary); transition: all 0.2s;">
+                    <i class="fas fa-rocket"></i>
+                    <span>Deploy Services</span>
+                </li>
                 <li class="menu-item" onclick="showSection('services')" style="padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; color: var(--text-secondary); transition: all 0.2s;">
                     <i class="fas fa-box"></i>
-                    <span data-i18n="services">Services</span>
+                    <span data-i18n="services">My Services</span>
                 </li>
                 <li class="menu-item" onclick="showSection('users')" style="padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; color: var(--text-secondary); transition: all 0.2s;">
                     <i class="fas fa-users"></i>
@@ -146,9 +150,134 @@
                 </div>
             </div>
 
-            <!-- Services Section -->
+            <!-- Deploy Services Catalog Section -->
+            <div id="catalog" class="section">
+                <div class="flex-between mb-lg">
+                    <div>
+                        <h2 style="margin-bottom: 0.5rem;">Service Catalog</h2>
+                        <p class="text-muted">Deploy AI/ML services with custom configurations</p>
+                    </div>
+                </div>
+
+                <!-- AI Services -->
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-brain"></i> AI & Machine Learning Services</h3>
+                    </div>
+                    <div class="grid grid-3 gap-lg" style="padding: 1.5rem;">
+                        <!-- LLM as a Service -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
+                            <h4 style="margin-bottom: 0.5rem;">LLM as a Service</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">Deploy large language models with API endpoints</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$0.50/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployLLMModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+
+                        <!-- Fine-Tuning as a Service -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                            <h4 style="margin-bottom: 0.5rem;">Fine-Tuning as a Service</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">Train and fine-tune custom models on your data</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$2.00/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployFineTuningModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+
+                        <!-- Computer Vision -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">👁️</div>
+                            <h4 style="margin-bottom: 0.5rem;">Computer Vision as a Service</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">Object detection, classification, and segmentation</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$0.75/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployComputerVisionModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+
+                        <!-- BYOM -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+                            <h4 style="margin-bottom: 0.5rem;">Bring Your Own Model</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">Deploy your custom trained models</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$0.60/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployBYOMModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+
+                        <!-- RAG -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                            <h4 style="margin-bottom: 0.5rem;">RAG as a Service</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">Retrieval Augmented Generation with vector DB</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$0.80/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployRAGModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+
+                        <!-- Agentic AI -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🤝</div>
+                            <h4 style="margin-bottom: 0.5rem;">Agentic AI Service</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">Deploy autonomous AI agents with tools</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$1.00/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployAgenticModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+
+                        <!-- Build Your Own AI -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🛠️</div>
+                            <h4 style="margin-bottom: 0.5rem;">Build Your Own AI</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">MLOps platform with Jupyter, MLflow & more</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$1.50/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployBuildAIModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Infrastructure Services -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-server"></i> Infrastructure Services</h3>
+                    </div>
+                    <div class="grid grid-2 gap-lg" style="padding: 1.5rem;">
+                        <!-- GPU VM -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">💻</div>
+                            <h4 style="margin-bottom: 0.5rem;">GPU VM as a Service</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">High-performance GPU virtual machines</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$1.20/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployVMModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+
+                        <!-- Bare Metal -->
+                        <div class="card" style="text-align: center; background: var(--bg-tertiary);">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🖥️</div>
+                            <h4 style="margin-bottom: 0.5rem;">Bare Metal as a Service</h4>
+                            <p class="text-muted text-sm" style="margin-bottom: 1rem;">Dedicated bare metal servers with full control</p>
+                            <p class="text-sm" style="margin-bottom: 1rem;"><strong>$3.00/hour</strong></p>
+                            <button class="btn btn-primary" onclick="openModal('deployBareMetalModal')" style="width: 100%;">
+                                <i class="fas fa-rocket"></i> Deploy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Services Section -->
             <div id="services" class="section">
-                <h2 class="mb-lg">Service Catalog</h2>
+                <h2 class="mb-lg">My Deployed Services</h2>
 
                 <div class="card mb-lg">
                     <div class="card-header">

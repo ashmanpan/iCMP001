@@ -28,7 +28,9 @@ function showSection(sectionId) {
     });
     event.target.closest('.menu-item').classList.add('active');
 
-    if (sectionId === 'services') {
+    if (sectionId === 'catalog') {
+        // Service catalog is static HTML, no need to load
+    } else if (sectionId === 'services') {
         loadServices();
     } else if (sectionId === 'users') {
         loadUsers();
@@ -191,6 +193,10 @@ function loadUsers() {
 }
 
 // Modal functions
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
 function openAddUserModal() {
     document.getElementById('addUserModal').classList.add('active');
 }
