@@ -73,32 +73,32 @@ const mockGPUs = {
 
 // UCS Servers
 const mockUCSServers = [
-    { id: 'UCS-001', name: 'UCS-C240-M6', rack: 'Rack-1', nexusSwitch: 'Nexus-9K-01', status: 'online', gpuCount: 2 },
-    { id: 'UCS-002', name: 'UCS-C480-M5', rack: 'Rack-1', nexusSwitch: 'Nexus-9K-01', status: 'online', gpuCount: 2 },
-    { id: 'UCS-003', name: 'UCS-C240-M6', rack: 'Rack-2', nexusSwitch: 'Nexus-9K-02', status: 'online', gpuCount: 2 },
-    { id: 'UCS-004', name: 'UCS-C220-M6', rack: 'Rack-2', nexusSwitch: 'Nexus-9K-02', status: 'online', gpuCount: 2 },
-    { id: 'UCS-005', name: 'UCS-C480-M5', rack: 'Rack-3', nexusSwitch: 'Nexus-9K-03', status: 'online', gpuCount: 2 },
-    { id: 'UCS-006', name: 'UCS-C240-M6', rack: 'Rack-3', nexusSwitch: 'Nexus-9K-03', status: 'online', gpuCount: 2 },
-    { id: 'UCS-007', name: 'UCS-C220-M6', rack: 'Rack-4', nexusSwitch: 'Nexus-9K-04', status: 'maintenance', gpuCount: 2 }
+    { id: 'UCS-001', name: 'UCS-C240-M6', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2 },
+    { id: 'UCS-002', name: 'UCS-C480-M5', rack: 'Rack-1', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2 },
+    { id: 'UCS-003', name: 'UCS-C240-M6', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 2 },
+    { id: 'UCS-004', name: 'UCS-C220-M6', rack: 'Rack-2', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 2 },
+    { id: 'UCS-005', name: 'UCS-C480-M5', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-01', status: 'online', gpuCount: 2 },
+    { id: 'UCS-006', name: 'UCS-C240-M6', rack: 'Rack-3', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'online', gpuCount: 2 },
+    { id: 'UCS-007', name: 'UCS-C220-M6', rack: 'Rack-4', nexusSwitch: 'Nexus-9332D-GX2B-02', status: 'maintenance', gpuCount: 2 }
 ];
 
-// Nexus Fabric - Spine-Leaf Architecture
+// Nexus Fabric - AI-Optimized Spine-Leaf Architecture
 const mockNexusFabric = [
-    // Spine Switches (Core Layer)
-    { id: 'Nexus-9K-02', model: 'Nexus 9364C', type: 'Spine', ports: 64, connectedServers: 2, status: 'healthy' },
-    { id: 'Nexus-9K-04', model: 'Nexus 9364C', type: 'Spine', ports: 64, connectedServers: 1, status: 'warning' },
+    // Spine Switches (Core Layer) - 800G/400G for AI Workloads
+    { id: 'Nexus-9364E-SG2-01', model: 'Nexus 9364E-SG2', type: 'Spine', ports: 64, speed: '800G', connectedServers: 2, status: 'healthy' },
+    { id: 'Nexus-9364E-SG2-02', model: 'Nexus 9364E-SG2', type: 'Spine', ports: 64, speed: '800G', connectedServers: 1, status: 'warning' },
 
-    // Leaf Switches (Access Layer)
-    { id: 'Nexus-9K-01', model: 'Nexus 9336C-FX2', type: 'Leaf', ports: 36, connectedServers: 2, status: 'healthy' },
-    { id: 'Nexus-9K-03', model: 'Nexus 9336C-FX2', type: 'Leaf', ports: 36, connectedServers: 2, status: 'healthy' }
+    // Leaf Switches (Access Layer) - 400G for GPU Connectivity
+    { id: 'Nexus-9332D-GX2B-01', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 2, status: 'healthy' },
+    { id: 'Nexus-9332D-GX2B-02', model: 'Nexus 9332D-GX2B', type: 'Leaf', ports: 32, speed: '400G', connectedServers: 2, status: 'healthy' }
 ];
 
 // Link Utilization between Spine and Leaf Switches (in %)
 const mockFabricLinks = [
-    { from: 'Nexus-9K-01', to: 'Nexus-9K-02', utilization: 45, status: 'healthy' },
-    { from: 'Nexus-9K-01', to: 'Nexus-9K-04', utilization: 72, status: 'warning' },
-    { from: 'Nexus-9K-03', to: 'Nexus-9K-02', utilization: 38, status: 'healthy' },
-    { from: 'Nexus-9K-03', to: 'Nexus-9K-04', utilization: 28, status: 'healthy' }
+    { from: 'Nexus-9332D-GX2B-01', to: 'Nexus-9364E-SG2-01', utilization: 45, status: 'healthy' },
+    { from: 'Nexus-9332D-GX2B-01', to: 'Nexus-9364E-SG2-02', utilization: 72, status: 'warning' },
+    { from: 'Nexus-9332D-GX2B-02', to: 'Nexus-9364E-SG2-01', utilization: 38, status: 'healthy' },
+    { from: 'Nexus-9332D-GX2B-02', to: 'Nexus-9364E-SG2-02', utilization: 28, status: 'healthy' }
 ];
 
 // Tenants - 10 total with varying GPU allocations

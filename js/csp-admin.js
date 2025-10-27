@@ -397,6 +397,7 @@ function loadFabric() {
             <td>${sw.id}</td>
             <td>${sw.model}</td>
             <td><span class="badge badge-${sw.type === 'Spine' ? 'info' : 'success'}">${sw.type}</span></td>
+            <td><strong style="color: var(--cisco-blue);">${sw.speed}</strong></td>
             <td>${sw.ports}</td>
             <td>${sw.connectedServers}</td>
             <td><span class="badge badge-${sw.status === 'healthy' ? 'success' : 'warning'}">${sw.status}</span></td>
@@ -508,7 +509,7 @@ function renderTopologyView() {
     });
 
     // Draw Spine Switches
-    svg += `<text x="${width / 2}" y="30" fill="var(--cisco-blue)" font-size="18" font-weight="600" text-anchor="middle">Spine Layer (Core)</text>`;
+    svg += `<text x="${width / 2}" y="30" fill="var(--cisco-blue)" font-size="18" font-weight="600" text-anchor="middle">Spine Layer (Core) - 800G</text>`;
     spineSwitches.forEach((sw, idx) => {
         const x = spineSpacing * (idx + 1);
         const y = spineY;
@@ -517,18 +518,19 @@ function renderTopologyView() {
 
         svg += `
             <g class="topology-switch" onclick="showSwitchInfo('${sw.id}')">
-                <rect x="${x - 60}" y="${y}" width="120" height="100"
+                <rect x="${x - 80}" y="${y}" width="160" height="110"
                       fill="var(--bg-card)" stroke="${statusColor}" stroke-width="3" rx="8" />
-                <text x="${x}" y="${y + 25}" fill="var(--text-primary)" font-size="14" font-weight="600" text-anchor="middle">${sw.id}</text>
-                <text x="${x}" y="${y + 45}" fill="var(--text-secondary)" font-size="11" text-anchor="middle">${sw.model}</text>
-                <text x="${x}" y="${y + 65}" fill="var(--cisco-blue)" font-size="10" text-anchor="middle">${sw.ports} Ports</text>
-                <circle cx="${x}" cy="${y + 85}" r="6" fill="${statusColor}" />
+                <text x="${x}" y="${y + 25}" fill="var(--text-primary)" font-size="13" font-weight="600" text-anchor="middle">${sw.id}</text>
+                <text x="${x}" y="${y + 45}" fill="var(--text-secondary)" font-size="10" text-anchor="middle">${sw.model}</text>
+                <text x="${x}" y="${y + 65}" fill="var(--cisco-blue)" font-size="11" font-weight="600" text-anchor="middle">${sw.speed}</text>
+                <text x="${x}" y="${y + 82}" fill="var(--text-muted)" font-size="9" text-anchor="middle">${sw.ports} Ports</text>
+                <circle cx="${x}" cy="${y + 98}" r="6" fill="${statusColor}" />
             </g>
         `;
     });
 
     // Draw Leaf Switches
-    svg += `<text x="${width / 2}" y="380" fill="var(--accent-green)" font-size="18" font-weight="600" text-anchor="middle">Leaf Layer (Access)</text>`;
+    svg += `<text x="${width / 2}" y="380" fill="var(--accent-green)" font-size="18" font-weight="600" text-anchor="middle">Leaf Layer (Access) - 400G</text>`;
     leafSwitches.forEach((sw, idx) => {
         const x = leafSpacing * (idx + 1);
         const y = leafY;
@@ -537,12 +539,13 @@ function renderTopologyView() {
 
         svg += `
             <g class="topology-switch" onclick="showSwitchInfo('${sw.id}')">
-                <rect x="${x - 60}" y="${y}" width="120" height="100"
+                <rect x="${x - 80}" y="${y}" width="160" height="110"
                       fill="var(--bg-card)" stroke="${statusColor}" stroke-width="3" rx="8" />
-                <text x="${x}" y="${y + 25}" fill="var(--text-primary)" font-size="14" font-weight="600" text-anchor="middle">${sw.id}</text>
-                <text x="${x}" y="${y + 45}" fill="var(--text-secondary)" font-size="11" text-anchor="middle">${sw.model}</text>
-                <text x="${x}" y="${y + 65}" fill="var(--cisco-blue)" font-size="10" text-anchor="middle">${sw.ports} Ports</text>
-                <circle cx="${x}" cy="${y + 85}" r="6" fill="${statusColor}" />
+                <text x="${x}" y="${y + 25}" fill="var(--text-primary)" font-size="13" font-weight="600" text-anchor="middle">${sw.id}</text>
+                <text x="${x}" y="${y + 45}" fill="var(--text-secondary)" font-size="10" text-anchor="middle">${sw.model}</text>
+                <text x="${x}" y="${y + 65}" fill="var(--cisco-blue)" font-size="11" font-weight="600" text-anchor="middle">${sw.speed}</text>
+                <text x="${x}" y="${y + 82}" fill="var(--text-muted)" font-size="9" text-anchor="middle">${sw.ports} Ports</text>
+                <circle cx="${x}" cy="${y + 98}" r="6" fill="${statusColor}" />
             </g>
         `;
     });
