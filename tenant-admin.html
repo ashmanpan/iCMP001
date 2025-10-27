@@ -1069,6 +1069,874 @@
         </div>
     </div>
 
+    <!-- BYOM (Bring Your Own Model) Modal -->
+    <div id="deployBYOMModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-box-open"></i> Deploy Your Own Model
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployBYOMModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Service Name *</label>
+                        <input type="text" class="form-input" id="byomServiceName" placeholder="e.g., custom-recommendation-engine">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Model Framework *</label>
+                        <select class="form-select" id="byomFramework">
+                            <option value="">Select framework...</option>
+                            <option value="pytorch">PyTorch</option>
+                            <option value="tensorflow">TensorFlow / Keras</option>
+                            <option value="onnx">ONNX</option>
+                            <option value="huggingface">Hugging Face Transformers</option>
+                            <option value="scikit-learn">Scikit-learn</option>
+                            <option value="xgboost">XGBoost</option>
+                            <option value="lightgbm">LightGBM</option>
+                            <option value="custom">Custom Framework</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Model Source *</label>
+                        <select class="form-select" id="byomSource" onchange="toggleBYOMSourceFields()">
+                            <option value="">Choose source...</option>
+                            <option value="upload">Upload Model Files</option>
+                            <option value="s3">Amazon S3</option>
+                            <option value="gcs">Google Cloud Storage</option>
+                            <option value="azure">Azure Blob Storage</option>
+                            <option value="huggingface-hub">Hugging Face Hub</option>
+                            <option value="github">GitHub Repository</option>
+                            <option value="docker">Docker Image</option>
+                        </select>
+                    </div>
+
+                    <!-- Upload Fields -->
+                    <div id="byomUploadFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Upload Model Package</label>
+                            <div style="border: 2px dashed var(--border-cisco); padding: 2rem; border-radius: 8px; text-align: center; cursor: pointer; background: var(--bg-tertiary);" onclick="document.getElementById('byomFileInput').click();">
+                                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--cisco-blue); margin-bottom: 0.5rem;"></i>
+                                <div>Upload model files (.pt, .h5, .pkl, .onnx)</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                    Max 10GB per file
+                                </div>
+                            </div>
+                            <input type="file" id="byomFileInput" multiple accept=".pt,.pth,.h5,.pkl,.onnx,.pb" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Cloud Storage Fields -->
+                    <div id="byomCloudFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Model Path/URI *</label>
+                            <input type="text" class="form-input" id="byomModelPath" placeholder="s3://bucket/model/ or gs://bucket/model/">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Access Credentials</label>
+                            <input type="text" class="form-input" id="byomAccessKey" placeholder="Access Key / Client ID">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-input" id="byomSecretKey" placeholder="Secret Key">
+                        </div>
+                    </div>
+
+                    <!-- Docker Fields -->
+                    <div id="byomDockerFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Docker Image *</label>
+                            <input type="text" class="form-input" id="byomDockerImage" placeholder="registry/image:tag">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Registry Credentials</label>
+                            <input type="text" class="form-input" id="byomDockerUser" placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-input" id="byomDockerPass" placeholder="Password/Token">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Inference Configuration</label>
+                        <select class="form-select" id="byomInferenceType">
+                            <option value="rest-api">REST API (Recommended)</option>
+                            <option value="grpc">gRPC (High Performance)</option>
+                            <option value="websocket">WebSocket (Real-time)</option>
+                            <option value="batch">Batch Processing</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">GPU Configuration *</label>
+                        <select class="form-select" id="byomGPUConfig">
+                            <option value="cpu-only">CPU Only (No GPU)</option>
+                            <option value="1xT4">1x T4 (16GB)</option>
+                            <option value="1xL4">1x L4 (24GB)</option>
+                            <option value="1xA100">1x A100 (80GB)</option>
+                            <option value="2xA100">2x A100 (80GB)</option>
+                            <option value="1xH100">1x H100 (80GB)</option>
+                            <option value="2xH100">2x H100 (80GB)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Container Resources</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-muted);">CPU Cores</label>
+                                <input type="number" class="form-input" id="byomCPU" value="4" min="1" max="64">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-muted);">Memory (GB)</label>
+                                <input type="number" class="form-input" id="byomMemory" value="16" min="1" max="512">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Auto-Scaling</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="byomAutoScale">
+                                <span>Enable auto-scaling based on load</span>
+                            </label>
+                        </div>
+                        <div id="byomScalingConfig" style="display: none; margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <label style="font-size: 0.8rem;">Min Replicas</label>
+                            <input type="number" class="form-input" id="byomMinReplicas" value="1" min="1" max="10">
+                            <label style="font-size: 0.8rem; margin-top: 0.5rem;">Max Replicas</label>
+                            <input type="number" class="form-input" id="byomMaxReplicas" value="5" min="1" max="50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Health Check Endpoint</label>
+                        <input type="text" class="form-input" id="byomHealthCheck" placeholder="/health or /ping" value="/health">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Environment Variables (Optional)</label>
+                        <textarea class="form-textarea" id="byomEnvVars" placeholder="KEY1=value1&#10;KEY2=value2" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">Deployment Details:</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
+                    <div><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> Automatic API endpoint generation</div>
+                    <div><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> Built-in monitoring & logging</div>
+                    <div><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> Load balancing included</div>
+                    <div><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> SSL/TLS encryption</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(4, 159, 217, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cisco-blue); margin-top: 1rem;">
+                <strong>Estimated Cost:</strong> <span id="byomEstimatedCost" style="color: var(--cisco-blue); font-size: 1.25rem;">$960</span>/month
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployBYOMService()">
+                    <i class="fas fa-rocket"></i> Deploy Model
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployBYOMModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RAG (Retrieval Augmented Generation) Modal -->
+    <div id="deployRAGModal" class="modal">
+        <div class="modal-content" style="max-width: 1100px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-search-plus"></i> Deploy RAG Service
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployRAGModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">RAG Service Name *</label>
+                        <input type="text" class="form-input" id="ragServiceName" placeholder="e.g., document-qa-system">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">LLM Model for Generation *</label>
+                        <select class="form-select" id="ragLLMModel">
+                            <option value="">Select LLM...</option>
+                            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                            <option value="claude-3-haiku">Claude 3 Haiku</option>
+                            <option value="llama-3-70b">Llama 3 70B</option>
+                            <option value="mistral-large">Mistral Large</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Vector Database *</label>
+                        <select class="form-select" id="ragVectorDB">
+                            <option value="">Choose vector DB...</option>
+                            <option value="pinecone">Pinecone (Managed)</option>
+                            <option value="weaviate">Weaviate (Self-hosted)</option>
+                            <option value="qdrant">Qdrant (High performance)</option>
+                            <option value="milvus">Milvus (Open source)</option>
+                            <option value="chroma">Chroma DB (Lightweight)</option>
+                            <option value="pgvector">PostgreSQL + pgvector</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Embedding Model *</label>
+                        <select class="form-select" id="ragEmbeddingModel">
+                            <option value="">Select embedding model...</option>
+                            <option value="openai-ada-002">OpenAI text-embedding-ada-002</option>
+                            <option value="openai-3-large">OpenAI text-embedding-3-large</option>
+                            <option value="cohere-embed">Cohere Embed v3</option>
+                            <option value="bge-large">BGE Large (Open source)</option>
+                            <option value="e5-large">E5 Large (Multilingual)</option>
+                            <option value="instructor-xl">Instructor XL</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Document Source *</label>
+                        <select class="form-select" id="ragDocSource" onchange="toggleRAGSourceFields()">
+                            <option value="">Choose document source...</option>
+                            <option value="upload">Upload Documents</option>
+                            <option value="s3">Amazon S3 Bucket</option>
+                            <option value="gcs">Google Cloud Storage</option>
+                            <option value="sharepoint">Microsoft SharePoint</option>
+                            <option value="confluence">Confluence</option>
+                            <option value="notion">Notion</option>
+                            <option value="github">GitHub Repository</option>
+                            <option value="url">Web URLs / Sitemap</option>
+                        </select>
+                    </div>
+
+                    <!-- Upload Fields -->
+                    <div id="ragUploadFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Upload Documents</label>
+                            <div style="border: 2px dashed var(--border-cisco); padding: 2rem; border-radius: 8px; text-align: center; cursor: pointer; background: var(--bg-tertiary);" onclick="document.getElementById('ragFileInput').click();">
+                                <i class="fas fa-file-upload" style="font-size: 2rem; color: var(--cisco-blue); margin-bottom: 0.5rem;"></i>
+                                <div>Upload PDFs, Word docs, TXT, Markdown</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                    Supports: .pdf, .docx, .txt, .md, .html
+                                </div>
+                            </div>
+                            <input type="file" id="ragFileInput" multiple accept=".pdf,.docx,.txt,.md,.html" style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- Cloud/URL Fields -->
+                    <div id="ragCloudFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Source Path/URL *</label>
+                            <input type="text" class="form-input" id="ragSourcePath" placeholder="s3://bucket/docs/ or https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Credentials (if required)</label>
+                            <input type="text" class="form-input" id="ragSourceCreds" placeholder="API Key or Access Token">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Chunking Strategy</label>
+                        <select class="form-select" id="ragChunkStrategy">
+                            <option value="fixed">Fixed Size (512 tokens)</option>
+                            <option value="recursive">Recursive Character Splitting</option>
+                            <option value="semantic">Semantic Chunking (AI-based)</option>
+                            <option value="markdown">Markdown-aware</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Chunk Size</label>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <input type="range" id="ragChunkSize" min="128" max="2048" value="512" step="128"
+                                   oninput="document.getElementById('ragChunkValue').textContent = this.value"
+                                   style="flex: 1;">
+                            <strong id="ragChunkValue" style="min-width: 80px;">512 tokens</strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Retrieval Configuration</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-muted);">Top K Results</label>
+                                <input type="number" class="form-input" id="ragTopK" value="5" min="1" max="20">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-muted);">Similarity Threshold</label>
+                                <input type="number" class="form-input" id="ragSimilarity" value="0.7" min="0" max="1" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">GPU Allocation *</label>
+                        <select class="form-select" id="ragGPUConfig">
+                            <option value="1xL4">1x L4 (24GB) - Standard</option>
+                            <option value="2xL4">2x L4 (24GB) - High throughput</option>
+                            <option value="1xA100">1x A100 (80GB) - Large contexts</option>
+                            <option value="2xA100">2x A100 (80GB) - Enterprise</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Advanced Features</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="ragHybridSearch" checked>
+                                <span>Hybrid Search (Vector + Keyword)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="ragReranking">
+                                <span>Re-ranking with Cross-Encoder</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="ragCaching" checked>
+                                <span>Query Caching</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="ragCitations">
+                                <span>Include Source Citations</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Update Strategy</label>
+                        <select class="form-select" id="ragUpdateStrategy">
+                            <option value="manual">Manual Updates Only</option>
+                            <option value="scheduled">Scheduled Refresh (Daily)</option>
+                            <option value="realtime">Real-time Sync</option>
+                            <option value="incremental">Incremental Updates</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">Included Features:</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Document preprocessing</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Vector indexing</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> API endpoints</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Query analytics</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Version control</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Access control</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(4, 159, 217, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cisco-blue); margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <strong>Estimated Cost:</strong> <span id="ragEstimatedCost" style="color: var(--cisco-blue); font-size: 1.25rem;">$2,160</span>/month
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                        Setup time: ~30 minutes
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployRAGService()">
+                    <i class="fas fa-rocket"></i> Deploy RAG Service
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployRAGModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agentic AI Service Modal -->
+    <div id="deployAgenticModal" class="modal">
+        <div class="modal-content" style="max-width: 1100px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-robot"></i> Deploy Agentic AI Service
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployAgenticModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Agent Name *</label>
+                        <input type="text" class="form-input" id="agenticAgentName" placeholder="e.g., customer-support-agent">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Agent Type *</label>
+                        <select class="form-select" id="agenticAgentType">
+                            <option value="">Select agent type...</option>
+                            <option value="conversational">Conversational Agent (Customer service, Support)</option>
+                            <option value="task-automation">Task Automation Agent (Workflows, RPA)</option>
+                            <option value="research">Research Agent (Data gathering, Analysis)</option>
+                            <option value="coding">Coding Agent (Code generation, Review)</option>
+                            <option value="data-analyst">Data Analyst Agent (SQL, Visualization)</option>
+                            <option value="creative">Creative Agent (Content, Design)</option>
+                            <option value="multi-agent">Multi-Agent System (Collaborative)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Base LLM *</label>
+                        <select class="form-select" id="agenticLLM">
+                            <option value="">Choose LLM...</option>
+                            <option value="gpt-4-turbo">GPT-4 Turbo (Best reasoning)</option>
+                            <option value="gpt-4">GPT-4 (Balanced)</option>
+                            <option value="claude-3.5-sonnet">Claude 3.5 Sonnet (Best for agents)</option>
+                            <option value="claude-3-opus">Claude 3 Opus (Complex tasks)</option>
+                            <option value="gemini-pro">Gemini Pro (Multimodal)</option>
+                            <option value="llama-3-70b">Llama 3 70B (Open source)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Agent Framework *</label>
+                        <select class="form-select" id="agenticFramework">
+                            <option value="">Select framework...</option>
+                            <option value="langchain">LangChain (Most popular)</option>
+                            <option value="autogen">AutoGen (Microsoft)</option>
+                            <option value="crewai">CrewAI (Multi-agent)</option>
+                            <option value="haystack">Haystack (NLP-focused)</option>
+                            <option value="semantic-kernel">Semantic Kernel (Microsoft)</option>
+                            <option value="custom">Custom Implementation</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tools & Integrations</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.5rem; background: var(--bg-tertiary); border-radius: 8px;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="web-search">
+                                <span style="font-size: 0.85rem;">Web Search</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="calculator">
+                                <span style="font-size: 0.85rem;">Calculator</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="python-repl">
+                                <span style="font-size: 0.85rem;">Python REPL</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="sql-database">
+                                <span style="font-size: 0.85rem;">SQL Database</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="api-calls">
+                                <span style="font-size: 0.85rem;">API Calls</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="file-system">
+                                <span style="font-size: 0.85rem;">File System</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="email">
+                                <span style="font-size: 0.85rem;">Email (SMTP)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="slack">
+                                <span style="font-size: 0.85rem;">Slack</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="github">
+                                <span style="font-size: 0.85rem;">GitHub</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" value="jira">
+                                <span style="font-size: 0.85rem;">Jira</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Knowledge Base (Optional)</label>
+                        <select class="form-select" id="agenticKnowledgeBase">
+                            <option value="none">No Knowledge Base</option>
+                            <option value="new">Create New Knowledge Base</option>
+                            <option value="existing-rag">Use Existing RAG Service</option>
+                            <option value="upload">Upload Documents</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Agent Behavior Configuration</label>
+                        <textarea class="form-textarea" id="agenticSystemPrompt" placeholder="Define agent personality, goals, and constraints...&#10;&#10;Example:&#10;You are a helpful customer support agent. Be professional, empathetic, and solution-oriented." rows="6"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Memory Configuration</label>
+                        <select class="form-select" id="agenticMemory">
+                            <option value="none">No Memory (Stateless)</option>
+                            <option value="conversation">Conversation Memory (Session-based)</option>
+                            <option value="persistent">Persistent Memory (Long-term)</option>
+                            <option value="summary">Summary Memory (Condensed history)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Max Iterations</label>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <input type="range" id="agenticMaxIterations" min="1" max="20" value="10"
+                                   oninput="document.getElementById('agenticMaxIterValue').textContent = this.value"
+                                   style="flex: 1;">
+                            <strong id="agenticMaxIterValue" style="min-width: 50px;">10</strong>
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                            Maximum reasoning steps before agent stops
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">GPU Configuration *</label>
+                        <select class="form-select" id="agenticGPUConfig">
+                            <option value="1xL4">1x L4 (24GB) - Standard</option>
+                            <option value="2xL4">2x L4 (24GB) - High throughput</option>
+                            <option value="1xA100">1x A100 (80GB) - Complex reasoning</option>
+                            <option value="2xA100">2x A100 (80GB) - Multi-agent</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Advanced Options</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="agenticStreaming" checked>
+                                <span>Enable streaming responses</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="agenticLogging" checked>
+                                <span>Log all interactions</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="agenticSafeguards">
+                                <span>Content safety filters</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="agenticHumanInLoop">
+                                <span>Human-in-the-loop approval</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rate Limiting</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-muted);">Requests/min</label>
+                                <input type="number" class="form-input" id="agenticRateLimit" value="60" min="1" max="1000">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-muted);">Concurrent Users</label>
+                                <input type="number" class="form-input" id="agenticConcurrent" value="10" min="1" max="500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">Agent Capabilities:</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Autonomous reasoning</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Tool orchestration</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Chain-of-thought</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Error recovery</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Self-reflection</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> API integrations</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(4, 159, 217, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cisco-blue); margin-top: 1rem;">
+                <strong>Estimated Cost:</strong> <span id="agenticEstimatedCost" style="color: var(--cisco-blue); font-size: 1.25rem;">$3,600</span>/month
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployAgenticService()">
+                    <i class="fas fa-rocket"></i> Deploy Agent
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployAgenticModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Build Your Own AI Modal -->
+    <div id="deployBuildAIModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="fas fa-tools"></i> Build Your Own AI Solution
+                </h3>
+                <button class="close-modal" onclick="closeModal('deployBuildAIModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Project Name *</label>
+                        <input type="text" class="form-input" id="buildAIProjectName" placeholder="e.g., recommendation-system">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">AI Solution Type *</label>
+                        <select class="form-select" id="buildAISolutionType">
+                            <option value="">Select solution type...</option>
+                            <option value="mlops">MLOps Platform (Full ML lifecycle)</option>
+                            <option value="jupyter">Jupyter Notebook Environment</option>
+                            <option value="training">Model Training Environment</option>
+                            <option value="inference">Inference Server Cluster</option>
+                            <option value="pipeline">Data Pipeline & ETL</option>
+                            <option value="experiment">Experiment Tracking Platform</option>
+                            <option value="custom">Custom Development Environment</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Development Framework</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; background: var(--bg-tertiary); border-radius: 4px;">
+                                <input type="checkbox" value="pytorch">
+                                <span style="font-size: 0.85rem;">PyTorch</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; background: var(--bg-tertiary); border-radius: 4px;">
+                                <input type="checkbox" value="tensorflow">
+                                <span style="font-size: 0.85rem;">TensorFlow</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; background: var(--bg-tertiary); border-radius: 4px;">
+                                <input type="checkbox" value="jax">
+                                <span style="font-size: 0.85rem;">JAX</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.5rem; background: var(--bg-tertiary); border-radius: 4px;">
+                                <input type="checkbox" value="mxnet">
+                                <span style="font-size: 0.85rem;">MXNet</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">MLOps Tools</label>
+                        <div style="max-height: 200px; overflow-y: auto; padding: 0.5rem; background: var(--bg-tertiary); border-radius: 8px;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
+                                <input type="checkbox" value="mlflow">
+                                <span style="font-size: 0.85rem;">MLflow (Experiment tracking)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
+                                <input type="checkbox" value="kubeflow">
+                                <span style="font-size: 0.85rem;">Kubeflow (ML workflows)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
+                                <input type="checkbox" value="wandb">
+                                <span style="font-size: 0.85rem;">Weights & Biases</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
+                                <input type="checkbox" value="dvc">
+                                <span style="font-size: 0.85rem;">DVC (Data versioning)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
+                                <input type="checkbox" value="airflow">
+                                <span style="font-size: 0.85rem;">Apache Airflow</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
+                                <input type="checkbox" value="feast">
+                                <span style="font-size: 0.85rem;">Feast (Feature store)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; padding: 0.25rem;">
+                                <input type="checkbox" value="seldon">
+                                <span style="font-size: 0.85rem;">Seldon (Model serving)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Data Storage</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIObjectStorage">
+                                <span>Object Storage (S3-compatible)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIPostgres">
+                                <span>PostgreSQL Database</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIMongo">
+                                <span>MongoDB (Document store)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIRedis">
+                                <span>Redis (Cache/Queue)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Compute Resources *</label>
+                        <select class="form-select" id="buildAICompute">
+                            <option value="">Select compute tier...</option>
+                            <option value="small">Small - 4 vCPU, 16GB RAM, 1x L4 GPU</option>
+                            <option value="medium">Medium - 16 vCPU, 64GB RAM, 2x L4 GPU</option>
+                            <option value="large">Large - 32 vCPU, 128GB RAM, 4x A100 GPU</option>
+                            <option value="xlarge">XLarge - 64 vCPU, 256GB RAM, 8x H100 GPU</option>
+                            <option value="cluster">Multi-node Cluster (Custom)</option>
+                        </select>
+                    </div>
+
+                    <div id="buildAIClusterConfig" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">Cluster Configuration</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label style="font-size: 0.8rem; color: var(--text-muted);">Worker Nodes</label>
+                                    <input type="number" class="form-input" id="buildAIWorkerNodes" value="3" min="1" max="20">
+                                </div>
+                                <div>
+                                    <label style="font-size: 0.8rem; color: var(--text-muted);">GPUs per Node</label>
+                                    <input type="number" class="form-input" id="buildAIGPUsPerNode" value="8" min="1" max="8">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Development Environment Access</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIJupyter" checked>
+                                <span>JupyterLab (Web IDE)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIVSCode">
+                                <span>VS Code Server</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAISSH" checked>
+                                <span>SSH Access</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIRStudio">
+                                <span>RStudio Server</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Pre-installed Packages</label>
+                        <select class="form-select" id="buildAIPackages">
+                            <option value="minimal">Minimal (Base Python/CUDA only)</option>
+                            <option value="data-science">Data Science Stack (NumPy, Pandas, Scikit-learn)</option>
+                            <option value="deep-learning" selected>Deep Learning Stack (PyTorch, TensorFlow, Transformers)</option>
+                            <option value="nlp">NLP Specialized (SpaCy, NLTK, Gensim)</option>
+                            <option value="cv">Computer Vision (OpenCV, Detectron2, YOLO)</option>
+                            <option value="custom">Custom Requirements (upload requirements.txt)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Collaboration Features</label>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAISharedFS">
+                                <span>Shared File System</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIGit" checked>
+                                <span>Git Integration</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="buildAIMultiUser">
+                                <span>Multi-user Support</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Auto-Shutdown</label>
+                        <select class="form-select" id="buildAIAutoShutdown">
+                            <option value="never">Never (Always on)</option>
+                            <option value="1h">1 hour of inactivity</option>
+                            <option value="4h" selected>4 hours of inactivity</option>
+                            <option value="24h">24 hours of inactivity</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Persistent Storage (GB)</label>
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            <input type="range" id="buildAIStorage" min="100" max="5000" value="1000" step="100"
+                                   oninput="document.getElementById('buildAIStorageValue').textContent = this.value"
+                                   style="flex: 1;">
+                            <strong id="buildAIStorageValue" style="min-width: 80px;">1000 GB</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-tertiary); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">Included Features:</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.85rem;">
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> CUDA/cuDNN pre-configured</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Auto-scaling support</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> GPU monitoring</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Backup & snapshots</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> Tensorboard integration</div>
+                    <div><i class="fas fa-check" style="color: var(--accent-green);"></i> REST API access</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(4, 159, 217, 0.1); padding: 1rem; border-radius: 8px; border-left: 3px solid var(--cisco-blue); margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <strong>Estimated Cost:</strong> <span id="buildAIEstimatedCost" style="color: var(--cisco-blue); font-size: 1.25rem;">$4,800</span>/month
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">
+                        Setup time: ~15 minutes
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-md" style="margin-top: 1.5rem;">
+                <button class="btn btn-primary" onclick="deployBuildAIService()">
+                    <i class="fas fa-rocket"></i> Create Environment
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal('deployBuildAIModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/i18n.js"></script>
     <script src="js/mock-data.js"></script>
     <script src="js/tenant-admin.js"></script>
