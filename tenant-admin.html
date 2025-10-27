@@ -17,7 +17,7 @@
             <div class="sidebar-logo" style="padding: 0 1.5rem; margin-bottom: 2rem;">
                 <!-- Official Cisco Logo -->
                 <div style="padding: 1rem 0; border-bottom: 1px solid var(--border-primary); margin-bottom: 1rem;">
-                    <img src="https://www.cisco.com/c/en/us/about/brand-center/network-cisco-logo/_jcr_content/root/container/container_copy/container/image.img.png/1688583623962.png"
+                    <img src="https://translatorswithoutborders.org/wp-content/uploads/2021/12/Cisco-logo.png"
                          alt="Cisco Logo"
                          style="width: 100%; max-width: 150px; height: auto; display: block;"
                          onerror="this.style.display='none'; this.parentElement.querySelector('.logo-fallback').style.display='flex';">
@@ -310,14 +310,33 @@
                         <label class="form-label">Select LLM Model *</label>
                         <select class="form-select" id="llmModel">
                             <option value="">Choose a model...</option>
-                            <option value="gpt-4-turbo">GPT-4 Turbo (Latest, Best quality)</option>
-                            <option value="gpt-4">GPT-4 (Balanced)</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Fast, Cost-effective)</option>
-                            <option value="claude-3.5-sonnet">Claude 3.5 Sonnet (Best reasoning)</option>
-                            <option value="claude-3-opus">Claude 3 Opus (Best overall)</option>
-                            <option value="claude-3-haiku">Claude 3 Haiku (Fastest)</option>
-                            <option value="gemini-pro">Gemini Pro (Google)</option>
-                            <option value="mistral-large">Mistral Large (Open source)</option>
+                            <optgroup label="Llama 3 (Meta) - Latest">
+                                <option value="llama-3-70b">Llama 3 70B (Best quality)</option>
+                                <option value="llama-3-8b">Llama 3 8B (Fast, efficient)</option>
+                            </optgroup>
+                            <optgroup label="Llama 2 (Meta)">
+                                <option value="llama-2-70b">Llama 2 70B (High performance)</option>
+                                <option value="llama-2-13b">Llama 2 13B (Balanced)</option>
+                                <option value="llama-2-7b">Llama 2 7B (Lightweight)</option>
+                            </optgroup>
+                            <optgroup label="Mixtral (Mistral AI)">
+                                <option value="mixtral-8x22b">Mixtral 8x22B (Best reasoning)</option>
+                                <option value="mixtral-8x7b">Mixtral 8x7B (Excellent quality)</option>
+                                <option value="mistral-7b">Mistral 7B (Fast, efficient)</option>
+                            </optgroup>
+                            <optgroup label="Code Models">
+                                <option value="codellama-34b">CodeLlama 34B (Best for code)</option>
+                                <option value="codellama-13b">CodeLlama 13B (Code generation)</option>
+                            </optgroup>
+                            <optgroup label="Other Open Source">
+                                <option value="falcon-180b">Falcon 180B (High performance)</option>
+                                <option value="falcon-40b">Falcon 40B (Balanced)</option>
+                                <option value="vicuna-13b">Vicuna 13B (Conversational)</option>
+                                <option value="phi-3-medium">Phi-3 Medium (Microsoft)</option>
+                                <option value="gemma-7b">Gemma 7B (Google)</option>
+                                <option value="qwen-14b">Qwen 14B (Multilingual)</option>
+                                <option value="yi-34b">Yi 34B (High quality)</option>
+                            </optgroup>
                         </select>
                     </div>
 
@@ -422,11 +441,20 @@
                         <label class="form-label">Base Model *</label>
                         <select class="form-select" id="ftBaseModel">
                             <option value="">Select base model...</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="llama-3-70b">Llama 3 70B (Best quality)</option>
+                            <option value="llama-3-8b">Llama 3 8B (Fast, efficient)</option>
                             <option value="llama-2-70b">Llama 2 70B</option>
-                            <option value="llama-3-8b">Llama 3 8B</option>
+                            <option value="llama-2-13b">Llama 2 13B</option>
+                            <option value="llama-2-7b">Llama 2 7B</option>
+                            <option value="mixtral-8x7b">Mixtral 8x7B</option>
                             <option value="mistral-7b">Mistral 7B</option>
+                            <option value="codellama-34b">CodeLlama 34B (Code tasks)</option>
+                            <option value="codellama-13b">CodeLlama 13B</option>
                             <option value="falcon-40b">Falcon 40B</option>
+                            <option value="falcon-7b">Falcon 7B</option>
+                            <option value="vicuna-13b">Vicuna 13B</option>
+                            <option value="phi-3-medium">Phi-3 Medium</option>
+                            <option value="gemma-7b">Gemma 7B</option>
                         </select>
                     </div>
 
@@ -1278,12 +1306,15 @@
                         <label class="form-label">LLM Model for Generation *</label>
                         <select class="form-select" id="ragLLMModel">
                             <option value="">Select LLM...</option>
-                            <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                            <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                            <option value="claude-3-haiku">Claude 3 Haiku</option>
-                            <option value="llama-3-70b">Llama 3 70B</option>
-                            <option value="mistral-large">Mistral Large</option>
+                            <option value="llama-3-70b">Llama 3 70B (Recommended)</option>
+                            <option value="llama-3-8b">Llama 3 8B</option>
+                            <option value="mixtral-8x22b">Mixtral 8x22B</option>
+                            <option value="mixtral-8x7b">Mixtral 8x7B</option>
+                            <option value="mistral-7b">Mistral 7B</option>
+                            <option value="llama-2-70b">Llama 2 70B</option>
+                            <option value="llama-2-13b">Llama 2 13B</option>
+                            <option value="falcon-40b">Falcon 40B</option>
+                            <option value="vicuna-13b">Vicuna 13B</option>
                         </select>
                     </div>
 
@@ -1506,12 +1537,15 @@
                         <label class="form-label">Base LLM *</label>
                         <select class="form-select" id="agenticLLM">
                             <option value="">Choose LLM...</option>
-                            <option value="gpt-4-turbo">GPT-4 Turbo (Best reasoning)</option>
-                            <option value="gpt-4">GPT-4 (Balanced)</option>
-                            <option value="claude-3.5-sonnet">Claude 3.5 Sonnet (Best for agents)</option>
-                            <option value="claude-3-opus">Claude 3 Opus (Complex tasks)</option>
-                            <option value="gemini-pro">Gemini Pro (Multimodal)</option>
-                            <option value="llama-3-70b">Llama 3 70B (Open source)</option>
+                            <option value="llama-3-70b">Llama 3 70B (Best for agents)</option>
+                            <option value="llama-3-8b">Llama 3 8B</option>
+                            <option value="mixtral-8x22b">Mixtral 8x22B (Best reasoning)</option>
+                            <option value="mixtral-8x7b">Mixtral 8x7B (Complex tasks)</option>
+                            <option value="llama-2-70b">Llama 2 70B</option>
+                            <option value="codellama-34b">CodeLlama 34B (For coding agents)</option>
+                            <option value="mistral-7b">Mistral 7B (Fast)</option>
+                            <option value="falcon-40b">Falcon 40B</option>
+                            <option value="vicuna-13b">Vicuna 13B (Conversational)</option>
                         </select>
                     </div>
 
