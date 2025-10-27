@@ -657,8 +657,68 @@ function loadTopTenants() {
     }).join('');
 }
 
+// Load LLM Analytics
+function loadLLMAnalytics() {
+    // Find most popular by consumption (requests)
+    const mostPopular = [...mockLLMStats].sort((a, b) => b.totalRequests - a.totalRequests)[0];
+    document.getElementById('mostPopularLLM').innerHTML = `
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--cisco-blue); margin-bottom: 0.5rem;">${mostPopular.model}</div>
+        <div style="color: var(--text-secondary); font-size: 0.875rem;">${(mostPopular.totalRequests / 1000000).toFixed(2)}M requests</div>
+        <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">${mostPopular.provider}</div>
+    `;
+
+    // Find highest revenue
+    const highestRevenue = [...mockLLMStats].sort((a, b) => b.revenue - a.revenue)[0];
+    document.getElementById('highestRevenueLLM').innerHTML = `
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-green); margin-bottom: 0.5rem;">${highestRevenue.model}</div>
+        <div style="color: var(--text-secondary); font-size: 0.875rem;">$${highestRevenue.revenue.toLocaleString()}/month</div>
+        <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">${highestRevenue.provider}</div>
+    `;
+
+    // Find best profit margin
+    const bestMargin = [...mockLLMStats].sort((a, b) => b.profitMargin - a.profitMargin)[0];
+    document.getElementById('bestMarginLLM').innerHTML = `
+        <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-yellow); margin-bottom: 0.5rem;">${bestMargin.model}</div>
+        <div style="color: var(--text-secondary); font-size: 0.875rem;">${bestMargin.profitMargin}% margin</div>
+        <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem;">${bestMargin.provider}</div>
+    `;
+
+    // Load detailed LLM stats table
+    const llmStatsTable = document.getElementById('llmStatsTable');
+    llmStatsTable.innerHTML = [...mockLLMStats]
+        .sort((a, b) => b.revenue - a.revenue)
+        .map(llm => {
+            const profit = llm.revenue - llm.cost;
+            let marginColor = 'var(--accent-green)';
+            if (llm.profitMargin < 30) marginColor = 'var(--accent-yellow)';
+            if (llm.profitMargin < 20) marginColor = 'var(--accent-red)';
+
+            return `
+                <tr>
+                    <td><strong>${llm.model}</strong></td>
+                    <td style="color: var(--text-muted);">${llm.provider}</td>
+                    <td>${(llm.totalRequests / 1000000).toFixed(2)}M</td>
+                    <td><strong style="color: var(--accent-green);">$${llm.revenue.toLocaleString()}</strong></td>
+                    <td style="color: var(--text-muted);">$${llm.cost.toLocaleString()}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <strong style="color: ${marginColor};">${llm.profitMargin}%</strong>
+                            <div style="flex: 1; background: var(--bg-tertiary); height: 6px; border-radius: 3px; overflow: hidden; max-width: 100px;">
+                                <div style="width: ${llm.profitMargin}%; height: 100%; background: ${marginColor};"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="color: var(--cisco-blue);">${llm.avgResponseTime}s</td>
+                </tr>
+            `;
+        }).join('');
+}
+
 // Load Analytics
 function loadAnalytics() {
+    // Load LLM Analytics
+    loadLLMAnalytics();
+
     // Load Top 10 Tenants Revenue Table
     loadTopTenants();
 

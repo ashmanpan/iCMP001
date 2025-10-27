@@ -602,6 +602,48 @@
             <div id="analytics" class="section">
                 <h2 class="mb-lg">Analytics & Reports</h2>
 
+                <!-- LLM Performance Metrics -->
+                <div class="grid grid-3 mb-lg">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title" style="font-size: 1rem;">
+                                <i class="fas fa-fire"></i> Most Popular LLM
+                            </h3>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">By Consumption</div>
+                        </div>
+                        <div id="mostPopularLLM" style="padding: 1rem;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--cisco-blue); margin-bottom: 0.5rem;">--</div>
+                            <div style="color: var(--text-secondary); font-size: 0.875rem;">-- requests</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title" style="font-size: 1rem;">
+                                <i class="fas fa-dollar-sign"></i> Highest Revenue LLM
+                            </h3>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Revenue Generation</div>
+                        </div>
+                        <div id="highestRevenueLLM" style="padding: 1rem;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-green); margin-bottom: 0.5rem;">--</div>
+                            <div style="color: var(--text-secondary); font-size: 0.875rem;">$-- revenue</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title" style="font-size: 1rem;">
+                                <i class="fas fa-chart-line"></i> Best Profit Margin
+                            </h3>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">Profitability</div>
+                        </div>
+                        <div id="bestMarginLLM" style="padding: 1rem;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--accent-yellow); margin-bottom: 0.5rem;">--</div>
+                            <div style="color: var(--text-secondary); font-size: 0.875rem;">-- margin</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Top 10 Tenants Revenue -->
                 <div class="card mb-lg">
                     <div class="card-header">
@@ -625,6 +667,31 @@
                                 </tr>
                             </thead>
                             <tbody id="topTenantsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- LLM Detailed Stats -->
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-brain"></i> LLM Performance Comparison
+                        </h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>LLM Model</th>
+                                    <th>Provider</th>
+                                    <th>Total Requests</th>
+                                    <th>Revenue</th>
+                                    <th>Cost</th>
+                                    <th>Profit Margin</th>
+                                    <th>Avg Response</th>
+                                </tr>
+                            </thead>
+                            <tbody id="llmStatsTable"></tbody>
                         </table>
                     </div>
                 </div>

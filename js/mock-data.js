@@ -339,6 +339,76 @@ const mockLogs = [
 ];
 
 // Helper functions
+// LLM Usage Statistics
+const mockLLMStats = [
+    {
+        model: 'Claude 3.5 Sonnet',
+        provider: 'Anthropic',
+        totalRequests: 2850000,
+        totalTokens: 145000000,
+        revenue: 425000,
+        cost: 285000,
+        profitMargin: 32.9,
+        avgResponseTime: 1.2,
+        topTenants: ['AutoDrive Technologies', 'Global Bank Analytics', 'HealthTech Innovations']
+    },
+    {
+        model: 'GPT-4 Turbo',
+        provider: 'OpenAI',
+        totalRequests: 3250000,
+        totalTokens: 185000000,
+        revenue: 580000,
+        cost: 415000,
+        profitMargin: 28.4,
+        avgResponseTime: 1.5,
+        topTenants: ['Global Bank Analytics', 'MediaStream Corp', 'EduLearn Platform']
+    },
+    {
+        model: 'Llama 3.1 405B',
+        provider: 'Meta',
+        totalRequests: 1850000,
+        totalTokens: 95000000,
+        revenue: 245000,
+        cost: 145000,
+        profitMargin: 40.8,
+        avgResponseTime: 0.9,
+        topTenants: ['CloudOps Solutions', 'TechCorp AI Division', 'SecureNet Systems']
+    },
+    {
+        model: 'Gemini 1.5 Pro',
+        provider: 'Google',
+        totalRequests: 2150000,
+        totalTokens: 112000000,
+        revenue: 318000,
+        cost: 215000,
+        profitMargin: 32.4,
+        avgResponseTime: 1.1,
+        topTenants: ['SmartCity IoT', 'RetailAI Inc', 'DataMining Labs']
+    },
+    {
+        model: 'Claude 3 Opus',
+        provider: 'Anthropic',
+        totalRequests: 1580000,
+        totalTokens: 98000000,
+        revenue: 385000,
+        cost: 265000,
+        profitMargin: 31.2,
+        avgResponseTime: 1.8,
+        topTenants: ['HealthTech Innovations', 'Legal AI Services', 'MediaStream Corp']
+    },
+    {
+        model: 'Mistral Large',
+        provider: 'Mistral AI',
+        totalRequests: 1250000,
+        totalTokens: 68000000,
+        revenue: 185000,
+        cost: 95000,
+        profitMargin: 48.6,
+        avgResponseTime: 0.8,
+        topTenants: ['CloudOps Solutions', 'SecureNet Systems', 'DataMining Labs']
+    }
+];
+
 function getAllGPUs() {
     return [...mockGPUs.nvidia, ...mockGPUs.amd];
 }
