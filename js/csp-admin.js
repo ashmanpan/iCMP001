@@ -786,64 +786,340 @@ function loadAnalytics() {
 }
 
 // Modal functions
+// Update GPU count display from slider
+function updateGPUCount(value) {
+    document.getElementById('gpuCountDisplay').textContent = value;
+    const slider = document.getElementById('gpuSlider');
+    const availableCount = getAvailableGPUs().length;
+
+    // Update slider max based on available GPUs
+    if (parseInt(value) > availableCount) {
+        slider.value = availableCount;
+        document.getElementById('gpuCountDisplay').textContent = availableCount;
+    }
+}
+
+// Toggle billing fields based on selection
+function toggleBillingFields() {
+    const billingModel = document.getElementById('newTenantBillingModel').value;
+    const creditCardFields = document.getElementById('creditCardFields');
+    const invoiceFields = document.getElementById('invoiceFields');
+
+    // Hide all fields first
+    creditCardFields.style.display = 'none';
+    invoiceFields.style.display = 'none';
+
+    // Show relevant fields based on selection
+    if (billingModel === 'credit-card') {
+        creditCardFields.style.display = 'block';
+    } else if (billingModel === 'invoice' || billingModel === 'invoice-60') {
+        invoiceFields.style.display = 'block';
+    }
+    // Prepaid doesn't need additional fields
+}
+
+// Open Create Tenant Modal with full initialization
 function openCreateTenantModal() {
     const modal = document.getElementById('createTenantModal');
     modal.classList.add('active');
 
+    // Reset form
+    document.getElementById('newTenantName').value = '';
+    document.getElementById('newTenantIndustry').value = '';
+    document.getElementById('newTenantAddress').value = '';
+    document.getElementById('newTenantCity').value = '';
+    document.getElementById('newTenantState').value = '';
+    document.getElementById('newTenantZip').value = '';
+    document.getElementById('newTenantCountry').value = 'United States';
+    document.getElementById('newTenantAdminName').value = '';
+    document.getElementById('newTenantAdminEmail').value = '';
+    document.getElementById('newTenantAdminPhone').value = '';
+    document.getElementById('newTenantBudget').value = '';
+    document.getElementById('newTenantBillingModel').value = '';
+    document.getElementById('newTenantUsers').value = '10';
+    document.getElementById('gpuSlider').value = '0';
+    document.getElementById('gpuCountDisplay').textContent = '0';
+
+    // Reset billing fields
+    document.getElementById('creditCardFields').style.display = 'none';
+    document.getElementById('invoiceFields').style.display = 'none';
+
+    // Populate card expiry month dropdown
+    const monthSelect = document.getElementById('newTenantCardMonth');
+    monthSelect.innerHTML = '<option value="">MM</option>';
+    for (let i = 1; i <= 12; i++) {
+        const month = String(i).padStart(2, '0');
+        monthSelect.innerHTML += `<option value="${month}">${month}</option>`;
+    }
+
+    // Populate card expiry year dropdown
+    const yearSelect = document.getElementById('newTenantCardYear');
+    yearSelect.innerHTML = '<option value="">YYYY</option>';
+    const currentYear = new Date().getFullYear();
+    for (let i = 0; i < 10; i++) {
+        const year = currentYear + i;
+        yearSelect.innerHTML += `<option value="${year}">${year}</option>`;
+    }
+
     // Populate available GPUs
+    const availableGPUs = getAvailableGPUs();
+    document.getElementById('availableGPUCount').textContent = availableGPUs.length;
+
     const gpuSelect = document.getElementById('newTenantGPUs');
-    gpuSelect.innerHTML = getAvailableGPUs().map(gpu =>
+    gpuSelect.innerHTML = availableGPUs.map(gpu =>
         `<option value="${gpu.id}">${gpu.model} - ${gpu.memory} (${gpu.ucsServer})</option>`
     ).join('');
+
+    // Set slider max to available GPU count
+    document.getElementById('gpuSlider').max = availableGPUs.length;
+
+    // Populate service toggles
+    const serviceToggles = document.getElementById('serviceToggles');
+    serviceToggles.innerHTML = mockServices.map(service => `
+        <div style="background: var(--bg-tertiary); padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-primary);">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input type="checkbox"
+                       id="service_${service.id}"
+                       value="${service.id}"
+                       style="width: 18px; height: 18px; cursor: pointer;"
+                       ${service.id === 'llm' || service.id === 'rag' ? 'checked' : ''}>
+                <div>
+                    <div style="font-weight: 500; color: var(--text-primary);">
+                        ${service.icon} ${service.name.replace(' as a Service', '')}
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">${service.pricing}</div>
+                </div>
+            </label>
+        </div>
+    `).join('');
 }
 
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
 
+// Validate form fields
+function validateTenantForm() {
+    const name = document.getElementById('newTenantName').value.trim();
+    const address = document.getElementById('newTenantAddress').value.trim();
+    const adminName = document.getElementById('newTenantAdminName').value.trim();
+    const adminEmail = document.getElementById('newTenantAdminEmail').value.trim();
+    const budget = document.getElementById('newTenantBudget').value;
+    const billingModel = document.getElementById('newTenantBillingModel').value;
+
+    const errors = [];
+
+    // Required fields
+    if (!name) errors.push('Company Name is required');
+    if (!address) errors.push('Address is required');
+    if (!adminName) errors.push('Administrator Name is required');
+    if (!adminEmail) errors.push('Administrator Email is required');
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail)) {
+        errors.push('Invalid email format');
+    }
+    if (!budget || budget < 1000) errors.push('Monthly Budget must be at least $1,000');
+    if (!billingModel) errors.push('Billing Model is required');
+
+    // Validate billing-specific fields
+    if (billingModel === 'credit-card') {
+        const cardHolder = document.getElementById('newTenantCardHolder').value.trim();
+        const cardNumber = document.getElementById('newTenantCardNumber').value.trim();
+        const cardCVV = document.getElementById('newTenantCardCVV').value.trim();
+        const cardMonth = document.getElementById('newTenantCardMonth').value;
+        const cardYear = document.getElementById('newTenantCardYear').value;
+
+        if (!cardHolder) errors.push('Card Holder Name is required');
+        if (!cardNumber || cardNumber.length < 15) errors.push('Valid Card Number is required');
+        if (!cardCVV || cardCVV.length < 3) errors.push('Valid CVV is required');
+        if (!cardMonth) errors.push('Card Expiry Month is required');
+        if (!cardYear) errors.push('Card Expiry Year is required');
+    } else if (billingModel === 'invoice' || billingModel === 'invoice-60') {
+        const billingEmail = document.getElementById('newTenantBillingEmail').value.trim();
+        if (!billingEmail) {
+            errors.push('Billing Email is required for invoice-based billing');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(billingEmail)) {
+            errors.push('Invalid billing email format');
+        }
+    }
+
+    if (errors.length > 0) {
+        alert('Please fix the following errors:\n\n' + errors.join('\n'));
+        return false;
+    }
+
+    return true;
+}
+
 // Create Tenant (will be integrated with DynamoDB via Amplify)
 async function createTenant() {
-    const name = document.getElementById('newTenantName').value;
-    const budget = document.getElementById('newTenantBudget').value;
-    const gpuSelect = document.getElementById('newTenantGPUs');
-    const selectedGPUs = Array.from(gpuSelect.selectedOptions).map(opt => opt.value);
-
-    if (!name || !budget) {
-        alert('Please fill all fields');
+    // Validate form
+    if (!validateTenantForm()) {
         return;
     }
 
-    // This will be replaced with actual Amplify API call
-    const newTenant = {
-        id: 'tenant-' + Date.now(),
-        name: name,
-        status: 'active',
-        created: new Date().toISOString().split('T')[0],
-        allocatedGPUs: selectedGPUs.length,
-        consumptionRate: 0,
-        services: [],
-        users: 0,
-        monthlyBudget: parseInt(budget),
-        currentSpend: 0
+    // Collect all form data
+    const billingModel = document.getElementById('newTenantBillingModel').value;
+
+    const formData = {
+        // Company Information
+        name: document.getElementById('newTenantName').value.trim(),
+        industry: document.getElementById('newTenantIndustry').value,
+        address: document.getElementById('newTenantAddress').value.trim(),
+        city: document.getElementById('newTenantCity').value.trim(),
+        state: document.getElementById('newTenantState').value.trim(),
+        zip: document.getElementById('newTenantZip').value.trim(),
+        country: document.getElementById('newTenantCountry').value.trim(),
+
+        // Administrator Contact
+        adminName: document.getElementById('newTenantAdminName').value.trim(),
+        adminEmail: document.getElementById('newTenantAdminEmail').value.trim(),
+        adminPhone: document.getElementById('newTenantAdminPhone').value.trim(),
+
+        // Budget & Resources
+        monthlyBudget: parseInt(document.getElementById('newTenantBudget').value),
+        users: parseInt(document.getElementById('newTenantUsers').value) || 10,
+
+        // Billing Information
+        billingModel: billingModel,
+
+        // GPU Allocation
+        gpuCount: parseInt(document.getElementById('gpuSlider').value),
+        specificGPUs: Array.from(document.getElementById('newTenantGPUs').selectedOptions).map(opt => opt.value),
+
+        // Service Enablement
+        services: mockServices
+            .filter(service => document.getElementById(`service_${service.id}`)?.checked)
+            .map(service => service.id)
     };
 
-    // TODO: Add to DynamoDB via Amplify
-    // await API.graphql(graphqlOperation(createTenantMutation, { input: newTenant }));
+    // Add billing-specific data
+    if (billingModel === 'credit-card') {
+        const cardNumber = document.getElementById('newTenantCardNumber').value.trim();
+        formData.billing = {
+            type: 'credit-card',
+            cardHolder: document.getElementById('newTenantCardHolder').value.trim(),
+            // Store only last 4 digits for security
+            cardLast4: cardNumber.slice(-4),
+            // In production, use payment gateway tokenization
+            cardToken: 'tok_' + Math.random().toString(36).substr(2, 9),
+            expiryMonth: document.getElementById('newTenantCardMonth').value,
+            expiryYear: document.getElementById('newTenantCardYear').value
+        };
+    } else if (billingModel === 'invoice' || billingModel === 'invoice-60') {
+        formData.billing = {
+            type: billingModel,
+            terms: billingModel === 'invoice' ? 'NET 30' : 'NET 60',
+            poNumber: document.getElementById('newTenantPONumber').value.trim(),
+            billingContact: document.getElementById('newTenantBillingContact').value.trim(),
+            billingEmail: document.getElementById('newTenantBillingEmail').value.trim(),
+            taxId: document.getElementById('newTenantTaxID').value.trim()
+        };
+    } else if (billingModel === 'prepaid') {
+        formData.billing = {
+            type: 'prepaid',
+            creditBalance: 0
+        };
+    }
 
-    mockTenants.push(newTenant);
+    // Determine GPUs to allocate
+    let gpusToAllocate = [];
+    if (formData.specificGPUs.length > 0) {
+        // Use specifically selected GPUs
+        gpusToAllocate = formData.specificGPUs;
+    } else if (formData.gpuCount > 0) {
+        // Auto-select from available GPUs
+        const availableGPUs = getAvailableGPUs();
+        gpusToAllocate = availableGPUs.slice(0, formData.gpuCount).map(gpu => gpu.id);
+    }
 
-    // Update GPU allocations
-    selectedGPUs.forEach(gpuId => {
-        const gpu = getAllGPUs().find(g => g.id === gpuId);
-        if (gpu) {
-            gpu.status = 'allocated';
-            gpu.tenant = newTenant.id;
-        }
-    });
+    // Create tenant object for database
+    const newTenant = {
+        id: 'tenant-' + Date.now(),
 
-    closeModal('createTenantModal');
-    loadOverview();
-    alert('Tenant created successfully!');
+        // Company Information
+        name: formData.name,
+        industry: formData.industry,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip,
+        country: formData.country,
+
+        // Administrator Contact
+        adminName: formData.adminName,
+        adminEmail: formData.adminEmail,
+        adminPhone: formData.adminPhone,
+
+        // Status and Metadata
+        status: 'active',
+        created: new Date().toISOString().split('T')[0],
+        lastModified: new Date().toISOString(),
+
+        // Resources
+        allocatedGPUs: gpusToAllocate.length,
+        gpuIds: gpusToAllocate,
+        consumptionRate: 0,
+        users: formData.users,
+
+        // Financial
+        monthlyBudget: formData.monthlyBudget,
+        currentSpend: 0,
+        billingModel: formData.billingModel,
+        billing: formData.billing || {},
+
+        // Services
+        services: formData.services
+    };
+
+    try {
+        // TODO: Production API call to create tenant in DynamoDB
+        // const response = await fetch('/api/tenants', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify(newTenant)
+        // });
+        // if (!response.ok) throw new Error('Failed to create tenant');
+        // const createdTenant = await response.json();
+
+        // For now, add to mock data
+        mockTenants.push(newTenant);
+
+        // Update GPU allocations in mock data
+        gpusToAllocate.forEach(gpuId => {
+            const gpu = getAllGPUs().find(g => g.id === gpuId);
+            if (gpu) {
+                gpu.status = 'allocated';
+                gpu.tenant = newTenant.id;
+            }
+        });
+
+        // TODO: Production API call to update GPU allocations
+        // await Promise.all(gpusToAllocate.map(gpuId =>
+        //     fetch(`/api/gpus/${gpuId}`, {
+        //         method: 'PATCH',
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify({ status: 'allocated', tenantId: newTenant.id })
+        //     })
+        // ));
+
+        // Close modal and refresh data
+        closeModal('createTenantModal');
+
+        // Refresh all displays
+        loadOverview();
+        loadTenants();
+        loadGPUsByModel();
+
+        // Show success message
+        alert(`✓ Tenant "${newTenant.name}" created successfully!\n\n` +
+              `• ${gpusToAllocate.length} GPUs allocated\n` +
+              `• ${formData.services.length} services enabled\n` +
+              `• Admin: ${newTenant.adminEmail}`);
+
+    } catch (error) {
+        console.error('Error creating tenant:', error);
+        alert('Error creating tenant. Please try again.\n\n' + error.message);
+    }
 }
 
 // View Tenant Details

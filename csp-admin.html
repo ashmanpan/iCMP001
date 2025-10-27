@@ -721,30 +721,249 @@
 
     <!-- Create Tenant Modal -->
     <div id="createTenantModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 1200px; max-height: 95vh;">
             <div class="modal-header">
-                <h3 class="modal-title" data-i18n="createTenant">Create Tenant</h3>
+                <h3 class="modal-title">
+                    <i class="fas fa-building"></i> Create New Tenant
+                </h3>
                 <button class="close-modal" onclick="closeModal('createTenantModal')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="form-group">
-                <label class="form-label" data-i18n="tenantName">Tenant Name</label>
-                <input type="text" class="form-input" id="newTenantName">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <!-- Left Column: Company & Contact Info -->
+                <div>
+                    <h4 style="color: var(--cisco-blue); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-primary);">
+                        <i class="fas fa-info-circle"></i> Company Information
+                    </h4>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-building"></i> Company Name *
+                        </label>
+                        <input type="text" class="form-input" id="newTenantName" placeholder="e.g., TechCorp AI Division" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-industry"></i> Industry
+                        </label>
+                        <select class="form-select" id="newTenantIndustry">
+                            <option value="">Select Industry</option>
+                            <option value="Technology">Technology</option>
+                            <option value="Finance">Finance & Banking</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Retail">Retail & E-commerce</option>
+                            <option value="Manufacturing">Manufacturing</option>
+                            <option value="Education">Education</option>
+                            <option value="Media">Media & Entertainment</option>
+                            <option value="Automotive">Automotive</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-map-marker-alt"></i> Address *
+                        </label>
+                        <input type="text" class="form-input" id="newTenantAddress" placeholder="Street Address" required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-input" id="newTenantCity" placeholder="City">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">State</label>
+                            <input type="text" class="form-input" id="newTenantState" placeholder="State">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">ZIP Code</label>
+                            <input type="text" class="form-input" id="newTenantZip" placeholder="ZIP">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Country</label>
+                            <input type="text" class="form-input" id="newTenantCountry" placeholder="Country" value="United States">
+                        </div>
+                    </div>
+
+                    <h4 style="color: var(--cisco-blue); margin: 1.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-primary);">
+                        <i class="fas fa-user-tie"></i> Administrator Contact
+                    </h4>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-user"></i> Admin Name *
+                        </label>
+                        <input type="text" class="form-input" id="newTenantAdminName" placeholder="Full Name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-envelope"></i> Admin Email *
+                        </label>
+                        <input type="email" class="form-input" id="newTenantAdminEmail" placeholder="admin@company.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-phone"></i> Admin Phone
+                        </label>
+                        <input type="tel" class="form-input" id="newTenantAdminPhone" placeholder="+1 (555) 123-4567">
+                    </div>
+                </div>
+
+                <!-- Right Column: Resources & Services -->
+                <div>
+                    <h4 style="color: var(--cisco-blue); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-primary);">
+                        <i class="fas fa-dollar-sign"></i> Budget & Resources
+                    </h4>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-wallet"></i> Monthly Budget ($) *
+                        </label>
+                        <input type="number" class="form-input" id="newTenantBudget" placeholder="e.g., 50000" min="1000" step="1000" required>
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">Minimum: $1,000/month</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-credit-card"></i> Billing Model *
+                        </label>
+                        <select class="form-select" id="newTenantBillingModel" required onchange="toggleBillingFields()">
+                            <option value="">Select Billing Model</option>
+                            <option value="credit-card">Credit Card</option>
+                            <option value="invoice">Invoice Basis (NET 30)</option>
+                            <option value="invoice-60">Invoice Basis (NET 60)</option>
+                            <option value="prepaid">Prepaid Credits</option>
+                        </select>
+                    </div>
+
+                    <!-- Credit Card Fields -->
+                    <div id="creditCardFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-credit-card"></i> Card Holder Name
+                            </label>
+                            <input type="text" class="form-input" id="newTenantCardHolder" placeholder="Name on Card">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Card Number</label>
+                                <input type="text" class="form-input" id="newTenantCardNumber" placeholder="**** **** **** ****" maxlength="19">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">CVV</label>
+                                <input type="text" class="form-input" id="newTenantCardCVV" placeholder="***" maxlength="4">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Expiry Month</label>
+                                <select class="form-select" id="newTenantCardMonth">
+                                    <option value="">MM</option>
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Expiry Year</label>
+                                <select class="form-select" id="newTenantCardYear">
+                                    <option value="">YYYY</option>
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Fields -->
+                    <div id="invoiceFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-file-invoice"></i> Purchase Order Number
+                            </label>
+                            <input type="text" class="form-input" id="newTenantPONumber" placeholder="PO-XXXX-XXXX">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-building"></i> Billing Contact Name
+                            </label>
+                            <input type="text" class="form-input" id="newTenantBillingContact" placeholder="Accounts Payable Contact">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i> Billing Email
+                            </label>
+                            <input type="email" class="form-input" id="newTenantBillingEmail" placeholder="billing@company.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-hashtag"></i> Tax ID / VAT Number
+                            </label>
+                            <input type="text" class="form-input" id="newTenantTaxID" placeholder="XX-XXXXXXX">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-users"></i> Number of Users
+                        </label>
+                        <input type="number" class="form-input" id="newTenantUsers" placeholder="e.g., 50" min="1" value="10">
+                    </div>
+
+                    <h4 style="color: var(--cisco-blue); margin: 1.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-primary);">
+                        <i class="fas fa-microchip"></i> GPU Allocation
+                    </h4>
+
+                    <div class="form-group">
+                        <label class="form-label">Number of GPUs to Allocate</label>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <input type="range" id="gpuSlider" min="0" max="50" value="0" style="flex: 1;" oninput="updateGPUCount(this.value)">
+                            <div style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: 6px; min-width: 80px; text-align: center;">
+                                <strong id="gpuCountDisplay" style="color: var(--cisco-blue); font-size: 1.25rem;">0</strong>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">GPUs</div>
+                            </div>
+                        </div>
+                        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.5rem; display: block;">
+                            Available: <strong id="availableGPUCount" style="color: var(--accent-green);">0</strong> GPUs
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">GPU Selection (Optional)</label>
+                        <select class="form-select" id="newTenantGPUs" multiple style="height: 120px;">
+                            <!-- Will be populated dynamically -->
+                        </select>
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">Hold Ctrl/Cmd to select specific GPUs (optional)</small>
+                    </div>
+
+                    <h4 style="color: var(--cisco-blue); margin: 1.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border-primary);">
+                        <i class="fas fa-cogs"></i> Service Enablement
+                    </h4>
+
+                    <div id="serviceToggles" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; max-height: 250px; overflow-y: auto; padding: 0.5rem;">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Monthly Budget ($)</label>
-                <input type="number" class="form-input" id="newTenantBudget">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Allocate GPUs</label>
-                <select class="form-select" id="newTenantGPUs" multiple style="height: 150px;">
-                    <!-- Will be populated dynamically -->
-                </select>
-            </div>
-            <div class="flex gap-md">
-                <button class="btn btn-primary" onclick="createTenant()">Create</button>
-                <button class="btn btn-secondary" onclick="closeModal('createTenantModal')">Cancel</button>
+
+            <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-primary); display: flex; justify-content: space-between; align-items: center;">
+                <div style="color: var(--text-muted); font-size: 0.875rem;">
+                    <i class="fas fa-info-circle"></i> Fields marked with * are required
+                </div>
+                <div class="flex gap-md">
+                    <button class="btn btn-secondary" onclick="closeModal('createTenantModal')">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="createTenant()">
+                        <i class="fas fa-check"></i> Create Tenant
+                    </button>
+                </div>
             </div>
         </div>
     </div>
