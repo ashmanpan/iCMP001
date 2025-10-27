@@ -15,8 +15,8 @@ services_table = dynamodb.Table('cisco-cmp-services')
 
 def lambda_handler(event, context):
     """
-    AI Agent for Cisco CMP Portal
-    Uses Anthropic Claude on AWS Bedrock
+    AI Agent for Cisco iCMP (integrated Cloud Management Portal)
+    Uses Anthropic Claude Sonnet 4.5 on AWS Bedrock
     """
     try:
         body = json.loads(event['body']) if isinstance(event.get('body'), str) else event
@@ -111,7 +111,7 @@ def get_tenant_services(tenant_id):
 def build_system_prompt(role, context_data):
     """Build system prompt based on user role and context"""
 
-    base_prompt = """You are an AI assistant for the Cisco Cloud Management Platform (CMP).
+    base_prompt = """You are an AI assistant for the Cisco iCMP (integrated Cloud Management Portal).
 You help users manage GPU resources, tenants, AI services, and infrastructure.
 
 Your capabilities include:
@@ -218,9 +218,10 @@ def call_claude(system_prompt, user_message, context_data):
             ]
         }
 
-        # Call Bedrock
+        # Call Bedrock with inference profile for Claude Sonnet 4.5
+        # Use global cross-region inference profile (10% cost savings + best availability)
         response = bedrock.invoke_model(
-            modelId='anthropic.claude-sonnet-4-5-20250929-v1:0',  # Claude Sonnet 4.5
+            modelId='global.anthropic.claude-sonnet-4-5-20250929-v1:0',  # Claude Sonnet 4.5 Global Inference Profile
             body=json.dumps(request_body)
         )
 
