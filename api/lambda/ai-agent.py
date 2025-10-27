@@ -15,7 +15,7 @@ services_table = dynamodb.Table('cisco-cmp-services')
 
 def lambda_handler(event, context):
     """
-    AI Agent for Cisco iCMP (integrated Cloud Management Portal)
+    AI Agent for Cisco iCMP (integrated Cloud Management Platform)
     Uses Anthropic Claude Sonnet 4.5 on AWS Bedrock
     """
     try:
@@ -111,7 +111,7 @@ def get_tenant_services(tenant_id):
 def build_system_prompt(role, context_data):
     """Build system prompt based on user role and context"""
 
-    base_prompt = """You are an AI assistant for the Cisco iCMP (integrated Cloud Management Portal).
+    base_prompt = """You are an AI assistant for the Cisco iCMP (integrated Cloud Management Platform).
 You help users manage GPU resources, tenants, AI services, and infrastructure.
 
 Your capabilities include:
