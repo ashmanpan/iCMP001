@@ -1241,7 +1241,7 @@ async function createTenant() {
 
         // Refresh all displays
         loadOverview();
-        loadTenants();
+        loadTenantsList();
         loadGPUsByModel();
 
         // Show success message
@@ -1252,7 +1252,8 @@ async function createTenant() {
 
     } catch (error) {
         console.error('Error creating tenant:', error);
-        alert('Error creating tenant. Please try again.');
+        console.error('Stack trace:', error.stack);
+        alert('Error creating tenant. Please try again.\n\nCheck browser console for details.');
     }
 }
 
