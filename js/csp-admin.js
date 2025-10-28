@@ -70,6 +70,10 @@ function loadOverview() {
     createConsumptionChart();
 }
 
+// Chart instances
+let gpuChartInstance = null;
+let consumptionChartInstance = null;
+
 // Create GPU Distribution Chart
 function createGPUChart() {
     const ctx = document.getElementById('gpuChart').getContext('2d');
@@ -78,7 +82,12 @@ function createGPUChart() {
     const availableGPUs = getAvailableGPUs().length;
     const allocatedGPUs = getAllocatedGPUs().length;
 
-    new Chart(ctx, {
+    // Destroy existing chart if it exists
+    if (gpuChartInstance) {
+        gpuChartInstance.destroy();
+    }
+
+    gpuChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: ['NVIDIA', 'AMD', 'Available', 'Allocated'],
@@ -103,7 +112,12 @@ function createGPUChart() {
 function createConsumptionChart() {
     const ctx = document.getElementById('consumptionChart').getContext('2d');
 
-    new Chart(ctx, {
+    // Destroy existing chart if it exists
+    if (consumptionChartInstance) {
+        consumptionChartInstance.destroy();
+    }
+
+    consumptionChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
             labels: mockConsumptionData.map(d => d.month),
@@ -1238,7 +1252,7 @@ async function createTenant() {
 
     } catch (error) {
         console.error('Error creating tenant:', error);
-        alert('Error creating tenant. Please try again.\n\n' + error.message);
+        alert('Error creating tenant. Please try again.');
     }
 }
 
